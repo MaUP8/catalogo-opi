@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Tonos OPI disponibles</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=Figtree:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&display=swap">
 <style>*,*::before,*::after{box-sizing:border-box}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <style>
 /* Layout: carta de tonos. Cabecera fija con buscador, líneas como pestañas, familias como gotas de color,
@@ -12,7 +12,7 @@
 :root{
   --ground:#ffffff; --soft:#f4f1f5; --line:#e4dee6; --ink:#1d1522; --mute:#6f6475;
   --accent:#b3124f; --accent-ink:#ffffff; --ok:#1f7a4d;
-  --display:"Syne","Trebuchet MS",sans-serif; --body:"Figtree","Segoe UI",system-ui,sans-serif;
+  --display:"Helvetica Neue",Helvetica,"Arimo",Arial,sans-serif; --body:"Helvetica Neue",Helvetica,"Arimo",Arial,sans-serif;
   color-scheme:light;
 }
 html,body{background:var(--ground);color:var(--ink)}
@@ -21,6 +21,8 @@ body{font-family:var(--body);font-size:15px;line-height:1.4}
 header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ground);border-bottom:1px solid var(--line)}
 .head{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding-block:14px 10px}
 h1{font-family:var(--display);font-weight:700;font-size:clamp(20px,3.4vw,28px);letter-spacing:-.01em;margin:0;text-wrap:balance}
+.logo{height:26px;width:auto;flex:none}
+@media(min-width:700px){.logo{height:34px}}
 h1 small{display:block;font-family:var(--body);font-weight:500;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-bottom:2px}
 .search{flex:1 1 220px;min-width:0}
 .search input{width:100%;font:inherit;padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:var(--soft);color:var(--ink)}
@@ -100,7 +102,8 @@ main{padding-block:16px 120px}
 <header class="top">
   <div class="wrap">
     <div class="head">
-      <h1><small>Carta para profesionales</small>Tonos OPI disponibles</h1>
+      <img class="logo" src="img/opi.svg" alt="OPI" width="76" height="24">
+      <h1><small>Carta para profesionales</small>Tonos disponibles</h1>
       <div class="search"><input id="q" type="search" placeholder="Buscar por nombre o código" autocomplete="off" aria-label="Buscar por nombre o código"></div>
     </div>
     <div class="rowscroll" id="lines" role="group" aria-label="Línea"></div>
@@ -267,12 +270,13 @@ main{padding-block:16px 120px}
     var t=totals(), J=window.jspdf&&window.jspdf.jsPDF;
     if(!J) return Promise.reject(new Error('nopdf'));
     var pics={};
-    return Promise.all(t.C.map(function(it){ return loadImg('img/p/'+encodeURIComponent(it.key)+'.jpg').then(function(im){ pics[it.key]=im },function(){ pics[it.key]=null }) })).then(function(){
+    var logo=null;
+    return Promise.all([loadImg('img/opi.png').then(function(im){ logo=im },function(){})].concat(t.C.map(function(it){ return loadImg('img/p/'+encodeURIComponent(it.key)+'.jpg').then(function(im){ pics[it.key]=im },function(){ pics[it.key]=null }) }))).then(function(){
       var cw=220, ch=380, cv=document.createElement('canvas'); cv.width=cw; cv.height=ch; var cx=cv.getContext('2d');
       var doc=new J({unit:'mm',format:'a4'}), W=210, M=14, y=0, rowH=24, page=1;
       var d=new Date(), fecha=('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear();
       function head(){
-        doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(29,21,34); doc.text('Pedido OPI',M,18);
+        doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(29,21,34); if(logo){ doc.addImage(logo,'PNG',M,11.6,22,6.95); doc.text('Pedido',M+26,18) } else doc.text('Pedido OPI',M,18);
         doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(111,100,117);
         doc.text(fecha+'  ·  '+t.units+(t.units===1?' unidad':' unidades')+' en '+t.C.length+(t.C.length===1?' producto':' productos'),M,24);
         doc.text('Página '+page,W-M,18,{align:'right'});
