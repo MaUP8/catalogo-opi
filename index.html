@@ -38,6 +38,7 @@ h1 small{display:block;font-family:var(--body);font-weight:500;font-size:12px;le
 .colrow label{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
 .colrow select{flex:1 1 auto;min-width:0;max-width:420px;font:inherit;font-weight:500;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--ground);color:var(--ink)}
 .colrow select.on{background:var(--ink);border-color:var(--ink);color:var(--ground)}
+.colrow[hidden]{display:none}
 .colrow.linerow{display:none}
 @media(max-width:760px){#lines{display:none}.colrow.linerow{display:flex}.colrow label{flex:0 0 108px}}
 .drops{display:flex;flex-wrap:wrap;gap:8px 10px;padding-block:2px 12px;scrollbar-width:none}
@@ -194,10 +195,15 @@ main{padding-block:16px 120px}
     var d='';
     META.fams.forEach(function(n,i){ if(fc[i]) d+='<button class="drop" type="button" data-fam="'+i+'" aria-pressed="false"><i style="background:'+FAMHEX[n]+'"></i>'+esc(n)+'</button>' });
     $('fams').innerHTML=d;
-    var cc={}; ITEMS.forEach(function(it){ if(it.colx>=0) cc[it.colx]=(cc[it.colx]||0)+1 });
+    buildCols();
+  }
+  function buildCols(){
+    var cc={}; ITEMS.forEach(function(it){ if(it.colx>=0&&(S.line<0||it.line===S.line)) cc[it.colx]=(cc[it.colx]||0)+1 });
+    if(S.col>=0&&!cc[S.col]) S.col=-1;
     var o='<option value="-1">Todas las colecciones</option>';
     (META.cols||[]).forEach(function(n,i){ if(cc[i]) o+='<option value="'+i+'">'+esc(n)+' ('+cc[i]+')</option>' });
-    $('col').innerHTML=o;
+    var el=$('col'); el.innerHTML=o; el.value=String(S.col); el.className=S.col>=0?'on':'';
+    el.parentNode.hidden=!Object.keys(cc).length;
   }
   function filtered(){
     var q=norm(S.q);
@@ -363,7 +369,7 @@ main{padding-block:16px 120px}
     Array.prototype.forEach.call($('fams').children,function(c){c.setAttribute('aria-pressed',+c.getAttribute('data-fam')===S.fam)});
     render();
   });
-  function setLine(v){ S.line=v; Array.prototype.forEach.call($('lines').children,function(c){c.setAttribute('aria-pressed',+c.getAttribute('data-line')===v)}); $('linesel').value=String(v); $('linesel').className=v>=0?'on':''; render() }
+  function setLine(v){ S.line=v; Array.prototype.forEach.call($('lines').children,function(c){c.setAttribute('aria-pressed',+c.getAttribute('data-line')===v)}); $('linesel').value=String(v); $('linesel').className=v>=0?'on':''; buildCols(); render() }
   $('linesel').addEventListener('change',function(){ setLine(+this.value) });
   $('col').addEventListener('change',function(){ S.col=+this.value; this.className=S.col>=0?'on':''; render() });
   $('q').addEventListener('input',function(){ S.q=this.value; render() });
