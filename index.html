@@ -33,11 +33,14 @@ h1 small{display:block;font-family:var(--body);font-weight:500;font-size:12px;le
 .chip b{font-weight:500;color:var(--mute);margin-left:6px;font-variant-numeric:tabular-nums}
 .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--ground)}
 .chip[aria-pressed="true"] b{color:#cfc6d4}
+#lines{flex-wrap:wrap;overflow:visible}
 .colrow{display:flex;align-items:center;gap:10px;padding-block:0 10px}
 .colrow label{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
 .colrow select{flex:1 1 auto;min-width:0;max-width:420px;font:inherit;font-weight:500;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--ground);color:var(--ink)}
 .colrow select.on{background:var(--ink);border-color:var(--ink);color:var(--ground)}
-.drops{display:flex;gap:10px;overflow-x:auto;padding-block:2px 12px;scrollbar-width:none}
+.colrow.linerow{display:none}
+@media(max-width:760px){#lines{display:none}.colrow.linerow{display:flex}.colrow label{flex:0 0 108px}}
+.drops{display:flex;flex-wrap:wrap;gap:8px 10px;padding-block:2px 12px;scrollbar-width:none}
 .drops::-webkit-scrollbar{display:none}
 .drop{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;padding:2px;font:inherit;font-size:11px;color:var(--mute);cursor:pointer}
 .drop i{display:block;width:30px;height:30px;border-radius:50%;border:1px solid rgba(29,21,34,.18);box-shadow:inset -4px -5px 8px rgba(0,0,0,.14),inset 3px 4px 6px rgba(255,255,255,.45)}
@@ -111,6 +114,7 @@ main{padding-block:16px 120px}
       <div class="search"><input id="q" type="search" placeholder="Buscar por nombre o código" autocomplete="off" aria-label="Buscar por nombre o código"></div>
     </div>
     <div class="rowscroll" id="lines" role="group" aria-label="Línea"></div>
+    <div class="colrow linerow"><label for="linesel">Líneas</label><select id="linesel" aria-label="Línea"></select></div>
     <div class="colrow"><label for="col">Colecciones</label><select id="col" aria-label="Colección"></select></div>
     <div class="drops" id="fams" role="group" aria-label="Familia de color"></div>
   </div>
@@ -183,6 +187,9 @@ main{padding-block:16px 120px}
     var h='<button class="chip" type="button" data-line="-1" aria-pressed="true">Todas<b>'+ITEMS.length+'</b></button>';
     META.lines.forEach(function(n,i){ if(cnt[i]) h+='<button class="chip" type="button" data-line="'+i+'" aria-pressed="false">'+esc(n)+'<b>'+cnt[i]+'</b></button>' });
     $('lines').innerHTML=h;
+    var lo='<option value="-1">Todas las líneas ('+ITEMS.length+')</option>';
+    META.lines.forEach(function(n,i){ if(cnt[i]) lo+='<option value="'+i+'">'+esc(n)+' ('+cnt[i]+')</option>' });
+    $('linesel').innerHTML=lo;
     var fc={}; ITEMS.forEach(function(it){ if(it.fam>=0) fc[it.fam]=1 });
     var d='';
     META.fams.forEach(function(n,i){ if(fc[i]) d+='<button class="drop" type="button" data-fam="'+i+'" aria-pressed="false"><i style="background:'+FAMHEX[n]+'"></i>'+esc(n)+'</button>' });
@@ -348,9 +355,7 @@ main{padding-block:16px 120px}
   $('pdf').addEventListener('click',sendPdf);
   $('lines').addEventListener('click',function(ev){
     var b=ev.target.closest('.chip'); if(!b) return;
-    S.line=+b.getAttribute('data-line');
-    Array.prototype.forEach.call($('lines').children,function(c){c.setAttribute('aria-pressed',c===b)});
-    render();
+    setLine(+b.getAttribute('data-line'));
   });
   $('fams').addEventListener('click',function(ev){
     var b=ev.target.closest('.drop'); if(!b) return;
@@ -358,6 +363,8 @@ main{padding-block:16px 120px}
     Array.prototype.forEach.call($('fams').children,function(c){c.setAttribute('aria-pressed',+c.getAttribute('data-fam')===S.fam)});
     render();
   });
+  function setLine(v){ S.line=v; Array.prototype.forEach.call($('lines').children,function(c){c.setAttribute('aria-pressed',+c.getAttribute('data-line')===v)}); $('linesel').value=String(v); $('linesel').className=v>=0?'on':''; render() }
+  $('linesel').addEventListener('change',function(){ setLine(+this.value) });
   $('col').addEventListener('change',function(){ S.col=+this.value; this.className=S.col>=0?'on':''; render() });
   $('q').addEventListener('input',function(){ S.q=this.value; render() });
   $('clear').addEventListener('click',function(){ S.sel={}; save(); render(); bar() });
