@@ -248,7 +248,7 @@ main{padding-block:16px 120px}
       var x=it.cols>1?(it.col/(it.cols-1)*100):0, y=it.rows>1?(it.row/(it.rows-1)*100):0;
       h+='<div class="card'+(S.sel[it.key]?' on':'')+'" data-key="'+esc(it.key)+'">'+
          '<button class="pick" type="button" data-d="1" aria-label="Agregar '+esc(it.name)+'">'+
-         '<img class="pic" loading="lazy" decoding="async" width="220" height="380" alt="" src="img/p/'+encodeURIComponent(it.key)+'.jpg?v=7">'+
+         '<img class="pic" loading="lazy" decoding="async" width="220" height="380" alt="" src="img/p/'+encodeURIComponent(it.key)+'.jpg?v=8">'+
          '<span class="nm">'+esc(it.name)+'</span>'+
          '<span class="cd">'+esc(it.code||META.lines[it.line])+(it.gci?'<br>Cód. '+it.gci:'')+'</span>'+
          (it.price?'<span class="pr">'+money(it.price)+'</span>':'')+
@@ -296,7 +296,7 @@ main{padding-block:16px 120px}
     var t=totals(), h='';
     t.C.forEach(function(it){
       var n=S.sel[it.key];
-      h+='<div class="it" data-key="'+esc(it.key)+'"><img class="th" alt="" width="44" height="76" src="img/p/'+encodeURIComponent(it.key)+'.jpg?v=7">'+
+      h+='<div class="it" data-key="'+esc(it.key)+'"><img class="th" alt="" width="44" height="76" src="img/p/'+encodeURIComponent(it.key)+'.jpg?v=8">'+
          '<div class="t"><b>'+esc(it.name)+'</b><span>'+esc(it.code||META.lines[it.line])+(it.gci?' · Cód. '+it.gci:'')+(it.price?' · '+money(it.price)+' c/u':'')+'</span></div>'+
          '<div class="sub">'+(it.price?money(it.price*n):'')+'</div>'+
          '<div class="row2"><div class="qty"><button type="button" data-d="-1" aria-label="Quitar uno">−</button><output>'+n+'</output><button type="button" data-d="1" aria-label="Agregar uno">+</button></div>'+
@@ -321,7 +321,7 @@ main{padding-block:16px 120px}
     if(!J) return Promise.reject(new Error('nopdf'));
     var pics={};
     var logo=null;
-    return Promise.all([loadImg('img/opi.png').then(function(im){ logo=im },function(){})].concat(t.C.map(function(it){ return loadImg('img/p/'+encodeURIComponent(it.key)+'.jpg?v=7').then(function(im){ pics[it.key]=im },function(){ pics[it.key]=null }) }))).then(function(){
+    return Promise.all([loadImg('img/opi.png').then(function(im){ logo=im },function(){})].concat(t.C.map(function(it){ return loadImg('img/p/'+encodeURIComponent(it.key)+'.jpg?v=8').then(function(im){ pics[it.key]=im },function(){ pics[it.key]=null }) }))).then(function(){
       var cw=220, ch=380, cv=document.createElement('canvas'); cv.width=cw; cv.height=ch; var cx=cv.getContext('2d');
       var doc=new J({unit:'mm',format:'a4'}), W=210, M=14, y=0, rowH=24, page=1;
       var d=new Date(), fecha=('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear();
