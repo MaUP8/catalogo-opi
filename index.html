@@ -33,6 +33,10 @@ h1 small{display:block;font-family:var(--body);font-weight:500;font-size:12px;le
 .chip b{font-weight:500;color:var(--mute);margin-left:6px;font-variant-numeric:tabular-nums}
 .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--ground)}
 .chip[aria-pressed="true"] b{color:#cfc6d4}
+.colrow{display:flex;align-items:center;gap:10px;padding-block:0 10px}
+.colrow label{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.colrow select{flex:1 1 auto;min-width:0;max-width:420px;font:inherit;font-weight:500;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--ground);color:var(--ink)}
+.colrow select.on{background:var(--ink);border-color:var(--ink);color:var(--ground)}
 .drops{display:flex;gap:10px;overflow-x:auto;padding-block:2px 12px;scrollbar-width:none}
 .drops::-webkit-scrollbar{display:none}
 .drop{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;padding:2px;font:inherit;font-size:11px;color:var(--mute);cursor:pointer}
@@ -103,18 +107,19 @@ main{padding-block:16px 120px}
   <div class="wrap">
     <div class="head">
       <img class="logo" src="img/opi.svg" alt="OPI" width="76" height="24">
-      <h1><small>Carta para profesionales</small>Tonos disponibles</h1>
+      <h1><small>Carta para profesionales</small>Productos disponibles</h1>
       <div class="search"><input id="q" type="search" placeholder="Buscar por nombre o código" autocomplete="off" aria-label="Buscar por nombre o código"></div>
     </div>
     <div class="rowscroll" id="lines" role="group" aria-label="Línea"></div>
+    <div class="colrow"><label for="col">Colecciones</label><select id="col" aria-label="Colección"></select></div>
     <div class="drops" id="fams" role="group" aria-label="Familia de color"></div>
   </div>
 </header>
 
 <main class="wrap">
-  <div class="meta"><span id="count">Cargando tonos…</span><span id="fecha"></span></div>
+  <div class="meta"><span id="count">Cargando productos…</span><span id="fecha"></span></div>
   <div class="grid" id="grid"></div>
-  <p class="empty" id="empty" hidden>No hay tonos disponibles con ese filtro.</p>
+  <p class="empty" id="empty" hidden>No hay productos disponibles con ese filtro.</p>
 </main>
 
 <div class="bar" id="bar" hidden>
@@ -148,7 +153,7 @@ main{padding-block:16px 120px}
 (function(){
   var $=function(id){return document.getElementById(id)};
   var FAMHEX={Rosas:'#ee5d9a',Rojos:'#c4122f',Naranjas:'#f07a1e',Amarillos:'#f2d94e',Verdes:'#4fa36b',Azules:'#3a78c2',Morados:'#7b4bb0','Nudes y neutros':'#e3bfae',Marrones:'#6b4332',Blancos:'#f6f2ee',Grises:'#9a979e',Negros:'#17131a','Metálicos':'linear-gradient(135deg,#d9d9de,#8f8f98 45%,#f1f1f4 60%,#a9a9b2)'};
-  var S={line:-1,fam:-1,q:'',sel:{}}, T=[], META=null, DISP={}, ITEMS=[];
+  var S={line:-1,fam:-1,col:-1,q:'',sel:{}}, T=[], META=null, DISP={}, ITEMS=[];
   try{S.sel=JSON.parse(localStorage.getItem('opi-qty')||'{}')||{}}catch(e){S.sel={}}
   var phone=(location.hash||'').replace(/[^0-9]/g,'')||'59892775633';
   var TRASH='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
@@ -163,7 +168,7 @@ main{padding-block:16px 120px}
     T.forEach(function(t,i){
       if(!(t[0] in DISP)) return;
       var sheet=Math.floor(i/per), k=i%per, inSheet=Math.min(per,T.length-sheet*per), rowsN=Math.ceil(inSheet/cols);
-      ITEMS.push({gci:/^\d{6,}$/.test(t[0])?t[0]:'',key:t[0],code:t[1],name:t[2],line:t[3],fam:t[4],price:DISP[t[0]]||0,sheet:sheet,col:k%cols,row:Math.floor(k/cols),rows:rowsN,cols:cols,s:norm(t[1]+' '+t[2]+' '+t[0])});
+      ITEMS.push({gci:/^\d{6,}$/.test(t[0])?t[0]:'',key:t[0],code:t[1],name:t[2],line:t[3],fam:t[4],colx:(t.length>6?t[6]:-1),price:DISP[t[0]]||0,sheet:sheet,col:k%cols,row:Math.floor(k/cols),rows:rowsN,cols:cols,s:norm(t[1]+' '+t[2]+' '+t[0]+' '+((META.cols&&t[6]>=0)?META.cols[t[6]]:''))});
     });
     var pm=/[?&]p=([^&#]+)/.exec(location.search||''), shared=false;
     if(pm){ S.sel={}; pm[1].split('_').forEach(function(x){ var i=x.lastIndexOf('.'), k=decodeURIComponent(x.slice(0,i)), n=+x.slice(i+1); if(k&&n>0) S.sel[k]=Math.min(99,n) }); shared=true }
@@ -182,10 +187,14 @@ main{padding-block:16px 120px}
     var d='';
     META.fams.forEach(function(n,i){ if(fc[i]) d+='<button class="drop" type="button" data-fam="'+i+'" aria-pressed="false"><i style="background:'+FAMHEX[n]+'"></i>'+esc(n)+'</button>' });
     $('fams').innerHTML=d;
+    var cc={}; ITEMS.forEach(function(it){ if(it.colx>=0) cc[it.colx]=(cc[it.colx]||0)+1 });
+    var o='<option value="-1">Todas las colecciones</option>';
+    (META.cols||[]).forEach(function(n,i){ if(cc[i]) o+='<option value="'+i+'">'+esc(n)+' ('+cc[i]+')</option>' });
+    $('col').innerHTML=o;
   }
   function filtered(){
     var q=norm(S.q);
-    return ITEMS.filter(function(it){ return (S.line<0||it.line===S.line)&&(S.fam<0||it.fam===S.fam)&&(!q||it.s.indexOf(q)>=0) });
+    return ITEMS.filter(function(it){ return (S.line<0||it.line===S.line)&&(S.fam<0||it.fam===S.fam)&&(S.col<0||it.colx===S.col)&&(!q||it.s.indexOf(q)>=0) });
   }
   function qtyHtml(it){
     var n=S.sel[it.key]||0;
@@ -198,7 +207,7 @@ main{padding-block:16px 120px}
       var x=it.cols>1?(it.col/(it.cols-1)*100):0, y=it.rows>1?(it.row/(it.rows-1)*100):0;
       h+='<div class="card'+(S.sel[it.key]?' on':'')+'" data-key="'+esc(it.key)+'">'+
          '<button class="pick" type="button" data-d="1" aria-label="Agregar '+esc(it.name)+'">'+
-         '<img class="pic" loading="lazy" decoding="async" width="220" height="380" alt="" src="img/p/'+encodeURIComponent(it.key)+'.jpg?v=4">'+
+         '<img class="pic" loading="lazy" decoding="async" width="220" height="380" alt="" src="img/p/'+encodeURIComponent(it.key)+'.jpg?v=5">'+
          '<span class="nm">'+esc(it.name)+'</span>'+
          '<span class="cd">'+esc(it.code||META.lines[it.line])+(it.gci?'<br>Cód. '+it.gci:'')+'</span>'+
          (it.price?'<span class="pr">'+money(it.price)+'</span>':'')+
@@ -246,7 +255,7 @@ main{padding-block:16px 120px}
     var t=totals(), h='';
     t.C.forEach(function(it){
       var n=S.sel[it.key];
-      h+='<div class="it" data-key="'+esc(it.key)+'"><img class="th" alt="" width="44" height="76" src="img/p/'+encodeURIComponent(it.key)+'.jpg?v=4">'+
+      h+='<div class="it" data-key="'+esc(it.key)+'"><img class="th" alt="" width="44" height="76" src="img/p/'+encodeURIComponent(it.key)+'.jpg?v=5">'+
          '<div class="t"><b>'+esc(it.name)+'</b><span>'+esc(it.code||META.lines[it.line])+(it.gci?' · Cód. '+it.gci:'')+(it.price?' · '+money(it.price)+' c/u':'')+'</span></div>'+
          '<div class="sub">'+(it.price?money(it.price*n):'')+'</div>'+
          '<div class="row2"><div class="qty"><button type="button" data-d="-1" aria-label="Quitar uno">−</button><output>'+n+'</output><button type="button" data-d="1" aria-label="Agregar uno">+</button></div>'+
@@ -271,7 +280,7 @@ main{padding-block:16px 120px}
     if(!J) return Promise.reject(new Error('nopdf'));
     var pics={};
     var logo=null;
-    return Promise.all([loadImg('img/opi.png').then(function(im){ logo=im },function(){})].concat(t.C.map(function(it){ return loadImg('img/p/'+encodeURIComponent(it.key)+'.jpg?v=4').then(function(im){ pics[it.key]=im },function(){ pics[it.key]=null }) }))).then(function(){
+    return Promise.all([loadImg('img/opi.png').then(function(im){ logo=im },function(){})].concat(t.C.map(function(it){ return loadImg('img/p/'+encodeURIComponent(it.key)+'.jpg?v=5').then(function(im){ pics[it.key]=im },function(){ pics[it.key]=null }) }))).then(function(){
       var cw=220, ch=380, cv=document.createElement('canvas'); cv.width=cw; cv.height=ch; var cx=cv.getContext('2d');
       var doc=new J({unit:'mm',format:'a4'}), W=210, M=14, y=0, rowH=24, page=1;
       var d=new Date(), fecha=('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear();
@@ -349,6 +358,7 @@ main{padding-block:16px 120px}
     Array.prototype.forEach.call($('fams').children,function(c){c.setAttribute('aria-pressed',+c.getAttribute('data-fam')===S.fam)});
     render();
   });
+  $('col').addEventListener('change',function(){ S.col=+this.value; this.className=S.col>=0?'on':''; render() });
   $('q').addEventListener('input',function(){ S.q=this.value; render() });
   $('clear').addEventListener('click',function(){ S.sel={}; save(); render(); bar() });
   window.__pdf=buildPdf;
