@@ -25,6 +25,14 @@ h1{font-family:var(--display);font-weight:700;font-size:clamp(20px,3.4vw,28px);l
 @media(min-width:700px){.logo{height:34px}}
 h1 small{display:block;font-family:var(--body);font-weight:500;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-bottom:2px}
 .search{flex:1 1 220px;min-width:0}
+.helpb{flex:none;order:3;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--ground);color:var(--ink);font:inherit;font-weight:700;font-size:18px;cursor:pointer}
+.search{order:2}
+@media(max-width:760px){.helpb{order:1;margin-left:auto}.search{order:3;flex-basis:100%}}
+.helpv{display:block;width:100%;max-height:42vh;object-fit:contain;background:var(--soft);border-radius:12px}
+.helpbody{overflow:auto;padding:0 18px 6px}
+.helpbody ol{margin:14px 0 4px;padding-left:22px;display:grid;gap:8px}
+.helpbody li b{font-weight:600}
+@media(min-width:761px){.helpgrid{display:grid;grid-template-columns:minmax(0,260px) 1fr;gap:20px;align-items:start}.helpv{max-height:62vh}.helpbody ol{margin-top:0}}
 .search input{width:100%;font:inherit;padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:var(--soft);color:var(--ink)}
 .search input:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .rowscroll{display:flex;gap:8px;overflow-x:auto;padding-block:4px 10px;scrollbar-width:none}
@@ -40,7 +48,7 @@ h1 small{display:block;font-family:var(--body);font-weight:500;font-size:12px;le
 .colrow select.on{background:var(--ink);border-color:var(--ink);color:var(--ground)}
 .colrow[hidden]{display:none}
 .colrow.linerow{display:none}
-@media(max-width:760px){#lines{display:none}.colrow.linerow{display:flex}.colrow label{flex:0 0 108px}}
+@media(max-width:760px){header.top{position:static}#lines{display:none}.colrow.linerow{display:flex}.colrow label{flex:0 0 108px}}
 .drops{display:flex;flex-wrap:wrap;gap:8px 10px;padding-block:2px 12px;scrollbar-width:none}
 .drops::-webkit-scrollbar{display:none}
 .drop{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;padding:2px;font:inherit;font-size:11px;color:var(--mute);cursor:pointer}
@@ -112,6 +120,7 @@ main{padding-block:16px 120px}
     <div class="head">
       <img class="logo" src="img/opi.svg" alt="OPI" width="76" height="24">
       <h1><small>Carta para profesionales</small>Productos disponibles</h1>
+      <button class="helpb" id="helpb" type="button" aria-label="Ayuda: cómo usar la carta">?</button>
       <div class="search"><input id="q" type="search" placeholder="Buscar por nombre o código" autocomplete="off" aria-label="Buscar por nombre o código"></div>
     </div>
     <div class="rowscroll" id="lines" role="group" aria-label="Línea"></div>
@@ -131,6 +140,24 @@ main{padding-block:16px 120px}
   <div class="in">
     <div class="n" id="barn"></div>
     <button class="btn wa" id="open" type="button">Ver pedido</button>
+  </div>
+</div>
+
+<div class="sheet" id="help" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="htitle">
+    <div class="phead"><h2 id="htitle">Cómo hacer tu pedido</h2><button class="x" id="hclose" type="button" aria-label="Cerrar">×</button></div>
+    <div class="helpbody"><div class="helpgrid">
+      <video class="helpv" id="helpv" src="img/ayuda.mp4?v=1" poster="img/ayuda.jpg?v=1" muted loop playsinline controls preload="none"></video>
+      <ol>
+        <li><b>Buscá</b> por nombre o código, o filtrá por línea, colección o color.</li>
+        <li>Tocá <b>Agregar</b> en cada producto y ajustá la cantidad con + y −. El tacho lo quita del pedido.</li>
+        <li>Abrí <b>Ver pedido</b>, abajo, para revisar todo lo que elegiste.</li>
+        <li><b>Realizar pedido</b> abre WhatsApp con el detalle listo para enviar.</li>
+        <li><b>Descargar pedido en PDF</b> guarda un resumen con fotos y cantidades.</li>
+      </ol>
+    </div></div>
+    <div class="pfoot"><div class="acts"><button class="btn pri" id="hok" type="button">Entendido</button></div>
+      <p class="hint">Podés volver a ver esta ayuda con el botón ? de arriba.</p></div>
   </div>
 </div>
 
@@ -181,6 +208,7 @@ main{padding-block:16px 120px}
     var f=res[1].fecha; if(f){var p=f.split('-'); $('fecha').textContent='Actualizado el '+p[2]+'/'+p[1]+'/'+p[0]}
     buildFilters(); render(); bar();
     if(shared&&chosen().length){ $('ptitle').textContent='Pedido recibido'; $('sheet').hidden=false; cart() }
+    else { var seen=null; try{ seen=localStorage.getItem('opi-help') }catch(e){} if(!seen) helpOpen() }
   }).catch(function(){ $('count').textContent='No se pudo cargar el catálogo. Probá recargar la página.' });
 
   function buildFilters(){
@@ -220,7 +248,7 @@ main{padding-block:16px 120px}
       var x=it.cols>1?(it.col/(it.cols-1)*100):0, y=it.rows>1?(it.row/(it.rows-1)*100):0;
       h+='<div class="card'+(S.sel[it.key]?' on':'')+'" data-key="'+esc(it.key)+'">'+
          '<button class="pick" type="button" data-d="1" aria-label="Agregar '+esc(it.name)+'">'+
-         '<img class="pic" loading="lazy" decoding="async" width="220" height="380" alt="" src="img/p/'+encodeURIComponent(it.key)+'.jpg?v=6">'+
+         '<img class="pic" loading="lazy" decoding="async" width="220" height="380" alt="" src="img/p/'+encodeURIComponent(it.key)+'.jpg?v=7">'+
          '<span class="nm">'+esc(it.name)+'</span>'+
          '<span class="cd">'+esc(it.code||META.lines[it.line])+(it.gci?'<br>Cód. '+it.gci:'')+'</span>'+
          (it.price?'<span class="pr">'+money(it.price)+'</span>':'')+
@@ -268,7 +296,7 @@ main{padding-block:16px 120px}
     var t=totals(), h='';
     t.C.forEach(function(it){
       var n=S.sel[it.key];
-      h+='<div class="it" data-key="'+esc(it.key)+'"><img class="th" alt="" width="44" height="76" src="img/p/'+encodeURIComponent(it.key)+'.jpg?v=6">'+
+      h+='<div class="it" data-key="'+esc(it.key)+'"><img class="th" alt="" width="44" height="76" src="img/p/'+encodeURIComponent(it.key)+'.jpg?v=7">'+
          '<div class="t"><b>'+esc(it.name)+'</b><span>'+esc(it.code||META.lines[it.line])+(it.gci?' · Cód. '+it.gci:'')+(it.price?' · '+money(it.price)+' c/u':'')+'</span></div>'+
          '<div class="sub">'+(it.price?money(it.price*n):'')+'</div>'+
          '<div class="row2"><div class="qty"><button type="button" data-d="-1" aria-label="Quitar uno">−</button><output>'+n+'</output><button type="button" data-d="1" aria-label="Agregar uno">+</button></div>'+
@@ -293,7 +321,7 @@ main{padding-block:16px 120px}
     if(!J) return Promise.reject(new Error('nopdf'));
     var pics={};
     var logo=null;
-    return Promise.all([loadImg('img/opi.png').then(function(im){ logo=im },function(){})].concat(t.C.map(function(it){ return loadImg('img/p/'+encodeURIComponent(it.key)+'.jpg?v=6').then(function(im){ pics[it.key]=im },function(){ pics[it.key]=null }) }))).then(function(){
+    return Promise.all([loadImg('img/opi.png').then(function(im){ logo=im },function(){})].concat(t.C.map(function(it){ return loadImg('img/p/'+encodeURIComponent(it.key)+'.jpg?v=7').then(function(im){ pics[it.key]=im },function(){ pics[it.key]=null }) }))).then(function(){
       var cw=220, ch=380, cv=document.createElement('canvas'); cv.width=cw; cv.height=ch; var cx=cv.getContext('2d');
       var doc=new J({unit:'mm',format:'a4'}), W=210, M=14, y=0, rowH=24, page=1;
       var d=new Date(), fecha=('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear();
@@ -372,6 +400,10 @@ main{padding-block:16px 120px}
   function setLine(v){ S.line=v; Array.prototype.forEach.call($('lines').children,function(c){c.setAttribute('aria-pressed',+c.getAttribute('data-line')===v)}); $('linesel').value=String(v); $('linesel').className=v>=0?'on':''; buildCols(); render() }
   $('linesel').addEventListener('change',function(){ setLine(+this.value) });
   $('col').addEventListener('change',function(){ S.col=+this.value; this.className=S.col>=0?'on':''; render() });
+  function helpOpen(){ var h=$('help'), v=$('helpv'); h.hidden=false; try{ v.currentTime=0; var pr=v.play(); if(pr&&pr.catch) pr.catch(function(){}) }catch(e){} }
+  function helpClose(){ $('help').hidden=true; try{ $('helpv').pause() }catch(e){} try{ localStorage.setItem('opi-help','1') }catch(e){} }
+  $('helpb').addEventListener('click',helpOpen); $('hclose').addEventListener('click',helpClose); $('hok').addEventListener('click',helpClose);
+  $('help').addEventListener('click',function(ev){ if(ev.target===this) helpClose() });
   $('q').addEventListener('input',function(){ S.q=this.value; render() });
   $('clear').addEventListener('click',function(){ S.sel={}; save(); render(); bar() });
   window.__pdf=buildPdf;
