@@ -39,7 +39,7 @@ for k, (p, aplica) in stock.items():
         aplica = True
         if not p and netos[L]: p = netos[L].most_common(1)[0][0]
     if not p:
-        sin_precio.append(k); d[k] = 0; continue
+        sin_precio.append(k); continue   # sin precio en lista: no se publica
     d[k] = round(p * (IMESI if aplica else 1) * IVA, 2)
 
 orden = [t[0] for t in tonos['t'] if t[0] in d]
