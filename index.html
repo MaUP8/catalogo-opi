@@ -84,7 +84,9 @@ main{padding-block:16px 120px}
 .chip.out[aria-pressed="true"]{background:var(--gift);border-color:var(--gift);color:#fff}
 .chip.out[aria-pressed="true"] b{color:#fff}
 .obox{border:1px solid var(--gift);background:var(--gift-soft);border-radius:14px;padding:14px 16px;margin-bottom:16px}
-.obox h2{font-family:var(--display);font-size:20px;margin:0 0 6px;color:var(--gift)}
+.obox h2{font-family:var(--display);font-size:20px;margin:0 0 6px;color:var(--gift);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ovb{flex:none;font:inherit;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;padding:6px 12px 6px 6px;border-radius:999px;border:1px solid var(--gift);background:#fff;color:var(--gift);cursor:pointer}
+.ovb i{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--gift);color:#fff;font-style:normal;font-size:11px}
 .obox p{margin:0 0 8px;max-width:72ch}
 .obox ul{margin:0 0 10px;padding-left:20px;display:grid;gap:4px;max-width:72ch}
 .osys{display:flex;flex-wrap:wrap;gap:8px}
@@ -196,6 +198,24 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
   </div>
 </div>
 
+<div class="sheet" id="ohelp" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="otitle">
+    <div class="phead"><h2 id="otitle">🎁 Cómo funciona el Outlet 1+1</h2><button class="x" id="oclose" type="button" aria-label="Cerrar">×</button></div>
+    <div class="helpbody"><div class="helpgrid">
+      <div class="helpvw"><video class="helpv" id="ohelpv" src="img/outlet.mp4?v=1" poster="img/outlet.jpg?v=1" playsinline controls preload="none"></video><button class="snd" id="osnd" type="button" hidden>🔊 Activar sonido</button></div>
+      <ol>
+        <li>Entrá a <b>🎁 Outlet 1+1</b>, en las líneas.</li>
+        <li>Por cada tono que comprás, te llevás <b>uno de regalo del mismo sistema</b> (Gel Color con Gel Color, Nail Lacquer con Nail Lacquer).</li>
+        <li><b>Agregá</b> los tonos que vas a comprar: del Outlet o de cualquier parte del catálogo.</li>
+        <li>Tocá <b>Elegir de regalo</b> en el tono que quieras: el mismo u otro distinto.</li>
+        <li>Los regalos van aparte en tu pedido, <b>sin cargo</b>. Pedido mínimo $ 4.500.</li>
+      </ol>
+    </div></div>
+    <div class="pfoot"><div class="acts"><button class="btn pri" id="ook" type="button">Entendido</button></div>
+      <p class="hint">Podés volver a ver este video con el botón ▶ del Outlet.</p></div>
+  </div>
+</div>
+
 <div class="sheet" id="sheet" hidden>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="ptitle">
     <div class="phead"><h2 id="ptitle">Tu pedido</h2><button class="x" id="close" type="button" aria-label="Cerrar">×</button></div>
@@ -262,7 +282,7 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
     $('lines').innerHTML=h;
     var lo=(nout?'<option value="-2">🎁 Outlet 1+1 ('+nout+')</option>':'')+'<option value="-1">Todas las líneas ('+ITEMS.length+')</option>';
     META.lines.forEach(function(n,i){ if(cnt[i]) lo+='<option value="'+i+'">'+esc(n)+' ('+cnt[i]+')</option>' });
-    $('linesel').innerHTML=lo;
+    $('linesel').innerHTML=lo; $('linesel').value=String(S.line);
     var fc={}; ITEMS.forEach(function(it){ if(it.fam>=0) fc[it.fam]=1 });
     var d='';
     META.fams.forEach(function(n,i){ if(fc[i]) d+='<button class="drop" type="button" data-fam="'+i+'" aria-pressed="false"><i style="background:'+FAMHEX[n]+'"></i>'+esc(n)+'</button>' });
@@ -316,7 +336,7 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
     var ol=outLines(), c=credits(), u=used(), sys='<button class="chip" type="button" data-osys="-1" aria-pressed="'+(S.osys<0)+'">Todos</button>', cr=[];
     Object.keys(ol).forEach(function(l){ sys+='<button class="chip" type="button" data-osys="'+l+'" aria-pressed="'+(S.osys===+l)+'">'+esc(META.lines[l])+'<b>'+ol[l]+'</b></button>';
       if(c[l]) cr.push(esc(META.lines[l])+': '+(u[l]||0)+' de '+c[l]+' elegidos') });
-    b.innerHTML='<h2>🎁 Outlet 1+1</h2>'+
+    b.innerHTML='<h2><span>🎁 Outlet 1+1</span><button class="ovb" id="ovb" type="button" aria-label="Ver video: cómo funciona el Outlet"><i>▶</i>Cómo funciona</button></h2>'+
       '<p>Por cada tono que comprás, te llevás <b>de regalo un tono del Outlet del mismo sistema</b>.</p>'+
       '<ul><li>Comprás un GelColor → elegís un GelColor del Outlet. Comprás un Nail Lacquer → elegís un Nail Lacquer. Los sistemas no se cruzan.</li>'+
       '<li>Sirve cualquier tono que compres, esté o no en el Outlet. Los tonos del Outlet también se pueden comprar.</li>'+
@@ -516,7 +536,7 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
   $('grid').addEventListener('click',onQty);
   $('items').addEventListener('click',onQty);
   $('ginfo').addEventListener('click',onQty);
-  $('obox').addEventListener('click',function(ev){ var b=ev.target.closest('[data-osys]'); if(!b) return; S.osys=+b.getAttribute('data-osys'); buildCols(); render() });
+  $('obox').addEventListener('click',function(ev){ if(ev.target.closest('#ovb')){ vidOpen('ohelp','ohelpv','osnd',false); return } var b=ev.target.closest('[data-osys]'); if(!b) return; S.osys=+b.getAttribute('data-osys'); buildCols(); render() });
   $('wa').addEventListener('click',function(ev){ if(this.getAttribute('aria-disabled')==='true'){ ev.preventDefault(); toast('El pedido mínimo es '+money(MINIMO)) } });
   $('open').addEventListener('click',function(){ $('sheet').hidden=false; cart() });
   $('close').addEventListener('click',function(){ $('sheet').hidden=true });
@@ -532,11 +552,12 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
     Array.prototype.forEach.call($('fams').children,function(c){c.setAttribute('aria-pressed',+c.getAttribute('data-fam')===S.fam)});
     render();
   });
-  function setLine(v){ S.line=v; Array.prototype.forEach.call($('lines').children,function(c){c.setAttribute('aria-pressed',+c.getAttribute('data-line')===v)}); $('linesel').value=String(v); $('linesel').className=v>=0?'on':''; buildCols(); render() }
+  function setLine(v){ if(v===OUTLET&&S.line!==OUTLET) setTimeout(ohelpAuto,350); S.line=v; Array.prototype.forEach.call($('lines').children,function(c){c.setAttribute('aria-pressed',+c.getAttribute('data-line')===v)}); $('linesel').value=String(v); $('linesel').className=v>=0?'on':''; buildCols(); render() }
   $('linesel').addEventListener('change',function(){ setLine(+this.value) });
   $('col').addEventListener('change',function(){ S.col=+this.value; this.className=S.col>=0?'on':''; render() });
-  function helpOpen(auto){
-    var h=$('help'), v=$('helpv'), sb=$('snd'); h.hidden=false; sb.hidden=true;
+  function helpOpen(auto){ vidOpen('help','helpv','snd',auto) }
+  function vidOpen(hid,vid,sid,auto){
+    var h=$(hid), v=$(vid), sb=$(sid); h.hidden=false; sb.hidden=true;
     try{
       v.currentTime=0; v.muted=(auto===true);
       var pr=v.play();
@@ -547,6 +568,12 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
   $('snd').addEventListener('click',function(){ var v=$('helpv'); v.muted=false; try{ v.currentTime=0; v.play() }catch(e){} this.hidden=true });
   $('helpv').addEventListener('volumechange',function(){ if(!this.muted) $('snd').hidden=true });
   function helpClose(){ $('help').hidden=true; try{ $('helpv').pause() }catch(e){} try{ localStorage.setItem('opi-help','1') }catch(e){} }
+  function ohelpClose(){ $('ohelp').hidden=true; try{ $('ohelpv').pause() }catch(e){} try{ localStorage.setItem('opi-ohelp','1') }catch(e){} }
+  $('osnd').addEventListener('click',function(){ var v=$('ohelpv'); v.muted=false; try{ v.currentTime=0; v.play() }catch(e){} this.hidden=true });
+  $('ohelpv').addEventListener('volumechange',function(){ if(!this.muted) $('osnd').hidden=true });
+  $('oclose').addEventListener('click',ohelpClose); $('ook').addEventListener('click',ohelpClose);
+  $('ohelp').addEventListener('click',function(ev){ if(ev.target===this) ohelpClose() });
+  function ohelpAuto(){ var seen=null; try{ seen=localStorage.getItem('opi-ohelp') }catch(e){} if(!seen&&$('help').hidden) vidOpen('ohelp','ohelpv','osnd',true) }
   $('helpb').addEventListener('click',function(){ helpOpen(false) }); $('hclose').addEventListener('click',helpClose); $('hok').addEventListener('click',helpClose);
   $('help').addEventListener('click',function(ev){ if(ev.target===this) helpClose() });
   $('q').addEventListener('input',function(){ S.q=this.value; render() });
