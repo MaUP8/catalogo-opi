@@ -192,7 +192,7 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
         <li><b>Realizar pedido</b> abre WhatsApp con el detalle listo para enviar.</li>
         <li><b>Descargar pedido en PDF</b> guarda un resumen con fotos y cantidades.</li>
         <li>En <b>Outlet 1+1</b>, por cada tono que comprás elegís uno de regalo del mismo sistema.</li>
-        <li>El pedido mínimo para enviarlo por WhatsApp es de <b class="minv">$ 4.500</b> a precio profesional.</li>
+        <li id="hmin">El pedido mínimo para enviarlo por WhatsApp es de <b class="minv">$ 4.500</b> a precio profesional.</li>
       </ol>
     </div></div>
     <div class="pfoot"><div class="acts"><button class="btn pri" id="hok" type="button">Entendido</button></div>
@@ -210,7 +210,7 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
         <li>Por cada tono que comprás, te llevás <b>uno de regalo del mismo sistema</b> (Gel Color con Gel Color, Nail Lacquer con Nail Lacquer).</li>
         <li><b>Agregá</b> los tonos que vas a comprar: del Outlet o de cualquier parte del catálogo.</li>
         <li>Tocá <b>Elegir de regalo</b> en el tono que quieras: el mismo u otro distinto.</li>
-        <li>Los regalos van aparte en tu pedido, <b>sin cargo</b>. Pedido mínimo <span class="minv">$ 4.500</span>.</li>
+        <li>Los regalos van aparte en tu pedido, <b>sin cargo</b>. <span id="omin">Pedido mínimo <span class="minv">$ 4.500</span>.</span></li>
       </ol>
     </div></div>
     <div class="pfoot"><div class="acts"><button class="btn pri" id="ook" type="button">Entendido</button></div>
@@ -247,8 +247,8 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
   var S={line:-1,fam:-1,col:-1,osys:-1,q:'',sel:{},gift:{}}, T=[], META=null, DISP={}, PP={}, OUT={}, ITEMS=[], BYKEY={};
   // Variantes de la carta: misma data, distinto teléfono y pedido mínimo según la ruta.
   var VAR={
-    montevideo:{tel:'59892775633', minimo:4500, sub:'Carta para profesionales', video:'img/outlet.mp4?v=2'},
-    interior:{tel:'59898010236', minimo:7500, sub:'Carta para profesionales · Interior del país', video:'img/outlet-interior.mp4?v=1'}
+    montevideo:{tel:'59892775633', minimo:4500, bajoMinimo:'bloquea', sub:'Carta para profesionales', video:'img/outlet.mp4?v=2'},
+    interior:{tel:'59898010236', minimo:7500, bajoMinimo:'publico', sub:'Carta para profesionales · Interior del país', video:'img/outlet-interior.mp4?v=1'}
   };
   var CFG=VAR[/\/interior(\/|$)/.test(location.pathname)?'interior':'montevideo'];
   var MINIMO=CFG.minimo, OUTLET=-2, TONO={0:1,1:1,2:1,3:1,4:1};
@@ -256,6 +256,9 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
   try{S.gift=JSON.parse(localStorage.getItem('opi-gift')||'{}')||{}}catch(e){S.gift={}}
   var phone=(location.hash||'').replace(/[^0-9]/g,'')||CFG.tel;
   $('sub').textContent=CFG.sub;
+  var PUB=CFG.bajoMinimo==='publico';
+  if(PUB){ $('hmin').innerHTML='Desde <b>'+money(MINIMO)+'</b> a precio profesional, tu pedido va a <b>precio profesional</b>. Si no llegás, se envía igual a precio consumidor final.';
+    $('omin').innerHTML='Desde '+money(MINIMO)+', precio profesional.' }
   Array.prototype.forEach.call(document.querySelectorAll('.minv'),function(e){ e.textContent=money(MINIMO) });
   if(CFG.video.indexOf('img/outlet.mp4')<0) $('ohelpv').src=CFG.video;
   var TRASH='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
@@ -377,8 +380,8 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
   function chosen(){ return ITEMS.filter(function(it){return S.sel[it.key]>0}) }
   function gifts(){ return ITEMS.filter(function(it){return S.gift[it.key]>0}) }
   function message(){
-    var C=chosen(), by={}, units=0, tot=0, all=true;
-    C.forEach(function(it){ (by[it.line]=by[it.line]||[]).push(it); units+=S.sel[it.key]; if(it.price) tot+=it.price*S.sel[it.key]; else all=false });
+    var t=totals(), C=t.C, by={}, units=t.units, tot=t.tot, all=t.all;
+    C.forEach(function(it){ (by[it.line]=by[it.line]||[]).push(it) });
     var out=['Hola, quiero hacer este pedido OPI:'];
     Object.keys(by).forEach(function(l){
       out.push(''); out.push(META.lines[l]+':');
@@ -389,7 +392,7 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
       G.forEach(function(it){ out.push('- '+S.gift[it.key]+' x '+(it.code?it.code+' ':'')+it.name+(it.gci?' (cód. '+it.gci+')':'')+' · '+META.lines[it.line]) }) }
     var link=orderLink(C); 
     out.push(''); var gu=0; G.forEach(function(it){ gu+=S.gift[it.key] });
-    out.push('Total: '+units+(units===1?' unidad':' unidades')+(gu?' + '+gu+(gu===1?' obsequio':' obsequios'):'')+(tot&&all?' · '+money(tot)+' con impuestos (precio profesional)':''));
+    out.push('Total: '+units+(units===1?' unidad':' unidades')+(gu?' + '+gu+(gu===1?' obsequio':' obsequios'):'')+(tot&&all?' · '+money(tot)+' con impuestos ('+lista(t)+')':''));
     if(link){ out.push(''); out.push('Ver pedido con fotos: '+link) }
     return out.join('\n');
   }
@@ -402,20 +405,25 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
     var x=it.cols>1?(it.col/(it.cols-1)*100):0, y=it.rows>1?(it.row/(it.rows-1)*100):0;
     return 'background-image:url(img/s'+it.sheet+'.webp);background-size:'+(it.cols*100)+'% '+(it.rows*100)+'%;background-position:'+x+'% '+y+'%';
   }
+  // Precio aplicado: profesional; en la variante 'publico', si el pedido no llega al mínimo
+  // (medido a precio profesional) todo va a precio consumidor final (o profesional si no tiene).
   function totals(){
-    var C=chosen(), units=0, tot=0, all=true;
-    C.forEach(function(it){ units+=S.sel[it.key]; if(it.price) tot+=it.price*S.sel[it.key]; else all=false });
+    var C=chosen(), units=0, prof=0, all=true;
+    C.forEach(function(it){ units+=S.sel[it.key]; if(it.price) prof+=it.price*S.sel[it.key]; else all=false });
+    var pub=PUB&&prof<MINIMO, pr=function(it){ return pub?(it.pp||it.price):it.price }, tot=0;
+    C.forEach(function(it){ tot+=(pr(it)||0)*S.sel[it.key] });
     var G=gifts(), gu=0; G.forEach(function(it){ gu+=S.gift[it.key] });
-    return {C:C,units:units,tot:tot,all:all,G:G,gu:gu};
+    return {C:C,units:units,tot:tot,prof:prof,pub:pub,pr:pr,falta:MINIMO-prof,all:all,G:G,gu:gu};
   }
+  function lista(t){ return t.pub?'precio consumidor final':'precio profesional' }
   function bar(){
     var t=totals(); $('bar').hidden=t.C.length===0;
     if(S.line===OUTLET) obox();
     if(!t.C.length){ $('sheet').hidden=true; return }
-    var falta=MINIMO-t.tot;
-    $('barn').innerHTML=t.units+(t.units===1?' unidad':' unidades')+' en '+t.C.length+(t.C.length===1?' producto':' productos')+(t.gu?' + '+t.gu+(t.gu===1?' regalo':' regalos'):'')+'<span>'+(t.tot?money(t.tot)+' con impuestos'+(falta>0?' · mínimo '+money(MINIMO):''):'Armá el pedido y envialo')+'</span>';
+    var falta=t.falta;
+    $('barn').innerHTML=t.units+(t.units===1?' unidad':' unidades')+' en '+t.C.length+(t.C.length===1?' producto':' productos')+(t.gu?' + '+t.gu+(t.gu===1?' regalo':' regalos'):'')+'<span>'+(t.tot?money(t.tot)+' con impuestos'+(t.pub?' · precio consumidor final':(falta>0?' · mínimo '+money(MINIMO):'')):'Armá el pedido y envialo')+'</span>';
     var wa=$('wa');
-    if(falta>0){ wa.removeAttribute('href'); wa.setAttribute('aria-disabled','true') }
+    if(falta>0&&!PUB){ wa.removeAttribute('href'); wa.setAttribute('aria-disabled','true') }
     else { wa.href='https://wa.me/'+phone+'?text='+encodeURIComponent(message()); wa.removeAttribute('aria-disabled') }
     if(!$('sheet').hidden) cart();
   }
@@ -424,8 +432,8 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
     t.C.forEach(function(it){
       var n=S.sel[it.key];
       h+='<div class="it" data-key="'+esc(it.key)+'"><img class="th" alt="" width="44" height="76" src="img/p/'+encodeURIComponent(it.key)+'.jpg?v=9">'+
-         '<div class="t"><b>'+esc(it.name)+'</b><span>'+esc(it.code||META.lines[it.line])+(it.gci?' · Cód. '+it.gci:'')+(it.price?' · '+money(it.price)+' c/u':'')+'</span></div>'+
-         '<div class="sub">'+(it.price?money(it.price*n):'')+'</div>'+
+         '<div class="t"><b>'+esc(it.name)+'</b><span>'+esc(it.code||META.lines[it.line])+(it.gci?' · Cód. '+it.gci:'')+(t.pr(it)?' · '+money(t.pr(it))+' c/u':'')+'</span></div>'+
+         '<div class="sub">'+(t.pr(it)?money(t.pr(it)*n):'')+'</div>'+
          '<div class="row2"><div class="qty"><button type="button" data-d="-1" aria-label="Quitar uno">−</button><output>'+n+'</output><button type="button" data-d="1" aria-label="Agregar uno">+</button></div>'+
          '<button class="rm" type="button" data-d="-99">'+TRASH+'Eliminar</button></div></div>';
     });
@@ -441,9 +449,9 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
     Object.keys(ol).forEach(function(l){ var f=(c[l]||0)-(u[l]||0); if(f>0) pend.push(f+' de '+META.lines[l]) });
     $('ginfo').hidden=!pend.length;
     $('ginfo').innerHTML=pend.length?'<span>🎁 Te '+(pend.length===1&&pend[0].indexOf('1 ')===0?'queda':'quedan')+' para elegir en el Outlet: '+esc(pend.join(', '))+'.</span><button type="button" id="goout">Elegir regalos</button>':'';
-    var falta=MINIMO-t.tot; $('minw').hidden=falta<=0;
-    $('minw').textContent=falta>0?'Pedido mínimo '+money(MINIMO)+' a precio profesional: te faltan '+money(falta)+' para enviarlo.':'';
-    $('totn').innerHTML=t.units+(t.units===1?' unidad':' unidades')+' <small>'+(t.all?'impuestos incluidos':'hay productos sin precio')+'</small>';
+    var falta=t.falta; $('minw').hidden=falta<=0;
+    $('minw').textContent=falta<=0?'':(PUB?'Tu pedido va a precio consumidor final. Sumá '+money(falta)+' (a precio profesional) y pasa a precio profesional.':'Pedido mínimo '+money(MINIMO)+' a precio profesional: te faltan '+money(falta)+' para enviarlo.');
+    $('totn').innerHTML=t.units+(t.units===1?' unidad':' unidades')+' <small>'+(t.all?'impuestos incluidos':'hay productos sin precio')+(PUB?' · '+lista(t):'')+'</small>';
     $('tot').textContent=t.tot?money(t.tot):'';
   }
   function change(k,d){
@@ -485,7 +493,7 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
         doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(111,100,117);
         doc.text(fecha+'  ·  '+t.units+(t.units===1?' unidad':' unidades')+' en '+t.C.length+(t.C.length===1?' producto':' productos')+(t.gu?'  ·  '+t.gu+(t.gu===1?' obsequio':' obsequios'):''),M,24);
         doc.text('Página '+page,W-M,18,{align:'right'});
-        doc.setFontSize(8); doc.text('PRODUCTO',M+16,32); doc.text('CANT.',128,32,{align:'right'}); doc.text('PRECIO PROF.',160,32,{align:'right'}); doc.text('SUBTOTAL',W-M,32,{align:'right'});
+        doc.setFontSize(8); doc.text('PRODUCTO',M+16,32); doc.text('CANT.',128,32,{align:'right'}); doc.text(t.pub?'PRECIO C. FINAL':'PRECIO PROF.',160,32,{align:'right'}); doc.text('SUBTOTAL',W-M,32,{align:'right'});
         doc.setDrawColor(228,222,230); doc.line(M,34,W-M,34); y=36;
       }
       head();
@@ -500,7 +508,7 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
         doc.setFontSize(12); doc.setTextColor(29,21,34); doc.setFont('helvetica','bold'); doc.text(String(n),128,y+11,{align:'right'});
         doc.setFont('helvetica','normal'); doc.setFontSize(10);
         if(gift){ doc.setTextColor(31,122,77); doc.text('Obsequio',160,y+11,{align:'right'}); doc.text(money(0),W-M,y+11,{align:'right'}); doc.setTextColor(29,21,34) }
-        else { doc.text(it.price?money(it.price):'-',160,y+11,{align:'right'}); doc.text(it.price?money(it.price*n):'-',W-M,y+11,{align:'right'}) }
+        else { var up=t.pr(it); doc.text(up?money(up):'-',160,y+11,{align:'right'}); doc.text(up?money(up*n):'-',W-M,y+11,{align:'right'}) }
         doc.setDrawColor(238,234,240); doc.line(M,y+rowH-1,W-M,y+rowH-1);
         y+=rowH;
       }
@@ -515,7 +523,7 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
       doc.text('Total: '+t.units+(t.units===1?' unidad':' unidades')+(t.gu?' + '+t.gu+(t.gu===1?' obsequio':' obsequios'):''),M,y+9);
       if(t.tot) doc.text(money(t.tot),W-M,y+9,{align:'right'});
       doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(111,100,117);
-      doc.text(t.all?'Precio profesional con impuestos incluidos. Sujeto a disponibilidad al confirmar.':'Hay productos sin precio cargado. Sujeto a disponibilidad al confirmar.',M,y+15);
+      doc.text(t.all?(t.pub?'Precio consumidor final':'Precio profesional')+' con impuestos incluidos. Sujeto a disponibilidad al confirmar.':'Hay productos sin precio cargado. Sujeto a disponibilidad al confirmar.',M,y+15);
       return {blob:doc.output('blob'),name:'pedido-opi-'+fecha.split('/').reverse().join('')+'.pdf'};
     });
   }
