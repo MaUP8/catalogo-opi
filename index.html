@@ -97,6 +97,8 @@ main{padding-block:16px 120px}
 .cred span{font-weight:400;color:var(--mute)}
 .gsec{padding:12px 0 2px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gift)}
 .it.gi .sub{color:var(--gift)}
+.telw{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600}
+.telw select{flex:1;min-width:0;font:inherit;font-weight:500;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--ground);color:var(--ink)}
 .minw{font-size:13px;font-weight:600;color:var(--accent);margin:0}
 .ginfo{font-size:13px;margin:0;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
 .ginfo button{font:inherit;font-size:13px;font-weight:600;padding:5px 12px;border-radius:999px;border:1px solid var(--gift);background:var(--gift-soft);color:var(--gift);cursor:pointer}
@@ -189,7 +191,7 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
         <li>Abrí <b>Ver pedido</b>, abajo, para revisar todo lo que elegiste.</li>
         <li><b>Realizar pedido</b> abre WhatsApp con el detalle listo para enviar.</li>
         <li><b>Descargar pedido en PDF</b> guarda un resumen con fotos y cantidades.</li>
-        <li>En <b>Outlet 1+1</b>, por cada tono que comprás elegís uno de regalo del mismo sistema.</li>
+        <li id="hout">En <b>Outlet 1+1</b>, por cada tono que comprás elegís uno de regalo del mismo sistema.</li>
         <li id="hmin">El pedido mínimo para enviarlo por WhatsApp es de <b class="minv">$ 4.500</b> a precio profesional.</li>
       </ol>
     </div></div>
@@ -223,6 +225,7 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
     <div class="pfoot">
       <div class="tot"><span id="totn"></span><strong id="tot"></strong></div>
       <p class="ginfo" id="ginfo" hidden></p>
+      <label class="telw" id="telw" hidden>Enviar el pedido a <select id="tel" aria-label="Enviar el pedido a"></select></label>
       <p class="minw" id="minw" hidden></p>
       <div class="acts">
         <a class="btn pri" id="wa" target="_blank" rel="noopener">Realizar pedido</a>
@@ -249,15 +252,33 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
     interior:{tel:'59898010236', minimo:7500, bajoMinimo:'publico', sub:'Carta para profesionales · Interior del país', video:'img/outlet-interior.mp4?v=2'}
   };
   var CFG=VAR[window.VARIANTE||(/\/interior(\/|$)/.test(location.pathname)?'interior':'montevideo')];
-  var MINIMO=CFG.minimo, OUTLET=-2, TONO={0:1,1:1,2:1,3:1,4:1};
+  var MINIMO=CFG.minimo, OUTLET=-2, TONO={0:1,1:1,2:1,3:1,4:1}, TELS=[{nombre:'',tel:CFG.tel}], OUTLET_ON=true, OCULTOS={};
   try{S.sel=JSON.parse(localStorage.getItem('opi-qty')||'{}')||{}}catch(e){S.sel={}}
   try{S.gift=JSON.parse(localStorage.getItem('opi-gift')||'{}')||{}}catch(e){S.gift={}}
-  var phone=(location.hash||'').replace(/[^0-9]/g,'')||CFG.tel;
+  var phone=CFG.tel, PUB=false;
+  // Configuración editable desde el portal de administración (data/config.json y data/ajustes.json).
+  function applyCfg(c,aj){
+    c=c||{};
+    if(c.telefonos&&c.telefonos.length) TELS=c.telefonos.filter(function(t){return t&&String(t.tel||'').replace(/[^0-9]/g,'')}).map(function(t){return {nombre:t.nombre||'',tel:String(t.tel).replace(/[^0-9]/g,'')}});
+    if(!TELS.length) TELS=[{nombre:'',tel:CFG.tel}];
+    if(+c.minimo>0) MINIMO=+c.minimo;
+    if(c.bajoMinimo==='publico'||c.bajoMinimo==='bloquea') CFG.bajoMinimo=c.bajoMinimo;
+    if(c.outlet===false) OUTLET_ON=false;
+    ((aj&&aj.ocultos)||[]).forEach(function(k){ OCULTOS[k]=1 });
+    var h=(location.hash||'').replace(/[^0-9]/g,''), pref=null; try{ pref=localStorage.getItem('opi-tel') }catch(e){}
+    phone=h||(TELS.some(function(t){return t.tel===pref})?pref:TELS[0].tel);
+    var sel=$('tel'); sel.innerHTML=TELS.map(function(t){return '<option value="'+esc(t.tel)+'">'+esc(t.nombre||('0'+t.tel.replace(/^598/,'')))+'</option>'}).join(''); sel.value=phone;
+    $('telw').hidden=TELS.length<2||!!h;
+    PUB=CFG.bajoMinimo==='publico';
+    $('hout').hidden=!OUTLET_ON;
+    applyTexts();
+  }
   $('sub').textContent=CFG.sub;
-  var PUB=CFG.bajoMinimo==='publico';
+  function applyTexts(){
   if(PUB){ $('hmin').innerHTML='Desde <b>'+money(MINIMO)+'</b> a precio profesional, tu pedido va a <b>precio profesional</b>. Si no llegás, se envía igual a precio consumidor final.';
     $('omin').innerHTML='Desde '+money(MINIMO)+', precio profesional.' }
   Array.prototype.forEach.call(document.querySelectorAll('.minv'),function(e){ e.textContent=money(MINIMO) });
+  }
   if(CFG.video.indexOf('img/outlet.mp4')<0) $('ohelpv').src=CFG.video;
   var TRASH='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
   function save(){try{localStorage.setItem('opi-qty',JSON.stringify(S.sel));localStorage.setItem('opi-gift',JSON.stringify(S.gift))}catch(e){}}
@@ -265,8 +286,11 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
   function norm(s){return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')}
   function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 
-  Promise.all([fetch('data/tonos.json').then(function(r){return r.json()}),fetch('data/disponibles.json').then(function(r){return r.json()})]).then(function(res){
-    META=res[0]; DISP=res[1].d||{}; PP=res[1].pp||{}; OUT=res[1].o||{}; T=META.t;
+  function opt(u){ return fetch(u,{cache:'no-cache'}).then(function(r){return r.ok?r.json():null}).catch(function(){return null}) }
+  Promise.all([fetch('data/tonos.json').then(function(r){return r.json()}),fetch('data/disponibles.json').then(function(r){return r.json()}),opt('data/config.json'),opt('data/ajustes.json')]).then(function(res){
+    applyCfg(res[2],res[3]);
+    META=res[0]; DISP=res[1].d||{}; PP=res[1].pp||{}; OUT=OUTLET_ON?(res[1].o||{}):{}; T=META.t;
+    Object.keys(OCULTOS).forEach(function(k){ delete DISP[k] });
     var per=META.cell[3], cols=META.cell[2];
     T.forEach(function(t,i){
       if(!(t[0] in DISP)) return;
@@ -553,6 +577,7 @@ a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
   $('grid').addEventListener('click',onQty);
   $('items').addEventListener('click',onQty);
   $('ginfo').addEventListener('click',onQty);
+  $('tel').addEventListener('change',function(){ phone=this.value; try{ localStorage.setItem('opi-tel',phone) }catch(e){} bar() });
   $('obox').addEventListener('click',function(ev){ if(ev.target.closest('#ovb')){ vidOpen('ohelp','ohelpv','osnd',false); return } var b=ev.target.closest('[data-osys]'); if(!b) return; S.osys=+b.getAttribute('data-osys'); buildCols(); render() });
   $('wa').addEventListener('click',function(ev){ if(this.getAttribute('aria-disabled')==='true'){ ev.preventDefault(); toast('El pedido mínimo es '+money(MINIMO)) } });
   $('open').addEventListener('click',function(){ $('sheet').hidden=false; cart() });

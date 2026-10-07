@@ -1,0 +1,6 @@
+{
+  "telefonos": [{"nombre": "Ventas OPI", "tel": "59892775633"}],
+  "minimo": 4500,
+  "bajoMinimo": "bloquea",
+  "outlet": true
+}
