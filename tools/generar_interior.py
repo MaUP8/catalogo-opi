@@ -17,7 +17,7 @@ s = s.replace('<!doctype html>', '<!doctype html>\n<!-- Generado desde MaUP8/cat
 s = re.sub(r'<title>.*?</title>', '<title>Catálogo OPI · Interior del país</title>', s, count=1)
 s = s.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf',
               "<script>window.VARIANTE='interior'</script>\n<script src=\"https://cdnjs.cloudflare.com/ajax/libs/jspdf", 1)
-s = re.sub(r'img/outlet\.mp4\?v=\d+', 'img/outlet-interior.mp4?v=1', s)
+s = re.sub(r'img/outlet\.mp4\?v=\d+', 'img/outlet-interior.mp4?v=2', s)
 assert "window.VARIANTE='interior'" in s
 os.makedirs(dest, exist_ok=True)
 open(os.path.join(dest, 'index.html'), 'w', encoding='utf-8').write(s)
