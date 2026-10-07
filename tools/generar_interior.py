@@ -22,9 +22,12 @@ assert "window.VARIANTE='interior'" in s
 os.makedirs(dest, exist_ok=True)
 open(os.path.join(dest, 'index.html'), 'w', encoding='utf-8').write(s)
 for d in ('data', 'img', 'img/p'): os.makedirs(os.path.join(dest, d), exist_ok=True)
-for f in ('data/tonos.json', 'data/disponibles.json', 'img/opi.svg', 'img/opi.png', 'img/ayuda.mp4',
-          'img/ayuda.jpg', 'img/outlet.jpg', 'img/outlet-interior.mp4'):
+for f in ('data/tonos.json', 'data/disponibles.json', 'img/opi.svg', 'img/opi.png',
+          'img/outlet.jpg', 'img/outlet-interior.mp4'):
     shutil.copy2(os.path.join(base, f), os.path.join(dest, f))
+# video de ayuda grabado sobre la página del interior
+shutil.copy2(os.path.join(base, 'img/ayuda-interior.mp4'), os.path.join(dest, 'img/ayuda.mp4'))
+shutil.copy2(os.path.join(base, 'img/ayuda-interior.jpg'), os.path.join(dest, 'img/ayuda.jpg'))
 src = os.path.join(base, 'img/p'); n = 0
 for f in os.listdir(src):
     a, b = os.path.join(src, f), os.path.join(dest, 'img/p', f)
