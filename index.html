@@ -378,6 +378,9 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
       ITEMS.push({gci:/^\d{6,}$/.test(t[0])?t[0]:'',key:t[0],hex:t[5]||'',code:t[1],name:t[2],line:t[3],fam:t[4],colx:(t.length>6?t[6]:-1),price:DISP[t[0]]||0,pp:PP[t[0]]||0,out:(TONO[t[3]]&&OUT[t[0]])||0,sheet:sheet,col:k%cols,row:Math.floor(k/cols),rows:rowsN,cols:cols,s:norm(t[1]+' '+t[2]+' '+t[0]+' '+((META.cols&&t[6]>=0)?META.cols[t[6]]:''))});
     });
     ITEMS.forEach(function(it){ BYKEY[it.key]=it });
+    // Mismo tono con dos códigos (el viejo con stock de Outlet y el nuevo): el viejo se ve solo dentro del Outlet.
+    var gem={}; ITEMS.forEach(function(it){ if(it.code&&!it.out) gem[it.code.toUpperCase()+'|'+it.line]=1 });
+    ITEMS.forEach(function(it){ if(it.out&&it.code&&gem[it.code.toUpperCase()+'|'+it.line]) it.soloOut=1 });
     var pm=/[?&]p=([^&#]+)/.exec(location.search||''), gm=/[?&]g=([^&#]+)/.exec(location.search||''), shared=false;
     function parse(str,obj){ str.split('_').forEach(function(x){ var i=x.lastIndexOf('.'), k=decodeURIComponent(x.slice(0,i)), n=+x.slice(i+1); if(k&&n>0) obj[k]=Math.min(99,n) }) }
     if(pm){ S.sel={}; S.gift={}; parse(pm[1],S.sel); if(gm) parse(gm[1],S.gift); shared=true }
@@ -391,12 +394,12 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
   }).catch(function(){ $('count').textContent='No se pudo cargar el catálogo. Probá recargar la página.' });
 
   function buildFilters(){
-    var cnt={}; ITEMS.forEach(function(it){cnt[it.line]=(cnt[it.line]||0)+1});
-    var nout=ITEMS.filter(function(it){return it.out}).length;
-    var h=(nout?'<button class="chip out" type="button" data-line="-2" aria-pressed="false">🎁 Outlet 1+1<b>'+nout+'</b></button>':'')+'<button class="chip" type="button" data-line="-1" aria-pressed="true">Todas<b>'+ITEMS.length+'</b></button>';
+    var cnt={}; ITEMS.forEach(function(it){ if(!it.soloOut) cnt[it.line]=(cnt[it.line]||0)+1 });
+    var nout=ITEMS.filter(function(it){return it.out}).length; var nvis=ITEMS.filter(function(it){return !it.soloOut}).length;
+    var h=(nout?'<button class="chip out" type="button" data-line="-2" aria-pressed="false">🎁 Outlet 1+1<b>'+nout+'</b></button>':'')+'<button class="chip" type="button" data-line="-1" aria-pressed="true">Todas<b>'+nvis+'</b></button>';
     META.lines.forEach(function(n,i){ if(cnt[i]) h+='<button class="chip" type="button" data-line="'+i+'" aria-pressed="false">'+esc(n)+'<b>'+cnt[i]+'</b></button>' });
     $('lines').innerHTML=h;
-    var lo=(nout?'<option value="-2">🎁 Outlet 1+1 ('+nout+')</option>':'')+'<option value="-1">Todas las líneas ('+ITEMS.length+')</option>';
+    var lo=(nout?'<option value="-2">🎁 Outlet 1+1 ('+nout+')</option>':'')+'<option value="-1">Todas las líneas ('+nvis+')</option>';
     META.lines.forEach(function(n,i){ if(cnt[i]) lo+='<option value="'+i+'">'+esc(n)+' ('+cnt[i]+')</option>' });
     $('linesel').innerHTML=lo; $('linesel').value=String(S.line);
     var fc={}; ITEMS.forEach(function(it){ if(it.fam>=0) fc[it.fam]=1 });
@@ -413,7 +416,7 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     var el=$('col'); el.innerHTML=o; el.value=String(S.col); el.className=S.col>=0?'on':'';
     el.parentNode.hidden=!Object.keys(cc).length;
   }
-  function inLine(it){ return S.line===OUTLET? (it.out>0&&(S.osys<0||it.line===S.osys)) : (S.line<0||it.line===S.line) }
+  function inLine(it){ return S.line===OUTLET? (it.out>0&&(S.osys<0||it.line===S.osys)) : (!it.soloOut&&(S.line<0||it.line===S.line)) }
   function filtered(){
     var q=norm(S.q);
     return ITEMS.filter(function(it){ return inLine(it)&&(S.fam<0||it.fam===S.fam)&&(S.col<0||it.colx===S.col)&&(!q||it.s.indexOf(q)>=0) });
@@ -468,7 +471,7 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
       '<button class="btn pri" type="button" id="goout2">Ver el Outlet</button></div>';
   }
   function heroPics(){
-    var pool=ITEMS.filter(function(it){return TONO[it.line]&&/^[0-9a-f]{6}$/i.test(it.hex)}), pick=[];
+    var pool=ITEMS.filter(function(it){return !it.soloOut&&TONO[it.line]&&/^[0-9a-f]{6}$/i.test(it.hex)}), pick=[];
     var nuevo=pool.filter(function(it){return it.colx===0}); if(nuevo.length>=3) pool=nuevo;
     var paso=Math.max(1,Math.floor(pool.length/3));
     for(var i=0;i<3&&i*paso<pool.length;i++) pick.push(pool[i*paso]);
@@ -499,7 +502,7 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
          '</button><div class="ctl">'+qtyHtml(it)+'</div><div class="gft">'+giftHtml(it)+'</div></div>';
   }
   // Filas comerciales arriba de la grilla (solo en "Todas" sin filtros): lo nuevo, lo más pedido, nudes.
-  function disp(k){ var it=BYKEY[k]; return it&&!OCULTOS[k]?it:null }
+  function disp(k){ var it=BYKEY[k]; return it&&!OCULTOS[k]&&!it.soloOut?it:null }
   function rowHtml(id,titulo,sub,items,ver){
     if(items.length<3) return '';
     return '<section class="row"><div class="rowh"><div><h2>'+esc(titulo)+'</h2>'+(sub?'<p>'+esc(sub)+'</p>':'')+'</div>'+
@@ -509,14 +512,14 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
   function rowsHtml(){
     var h='';
     // Lo nuevo: la colección más nueva con al menos 3 productos disponibles.
-    var cc={}; ITEMS.forEach(function(it){ if(it.colx>=0) cc[it.colx]=(cc[it.colx]||0)+1 });
+    var cc={}; ITEMS.forEach(function(it){ if(it.colx>=0&&!it.soloOut) cc[it.colx]=(cc[it.colx]||0)+1 });
     var ci=Object.keys(cc).map(Number).sort(function(a,b){return a-b}).filter(function(i){return cc[i]>=3})[0];
-    if(ci!=null){ var nv=ITEMS.filter(function(it){return it.colx===ci}); if(RANK) nv.sort(porRank);
+    if(ci!=null){ var nv=ITEMS.filter(function(it){return it.colx===ci&&!it.soloOut}); if(RANK) nv.sort(porRank);
       h+=rowHtml('rnew','Lo nuevo','Colección '+META.cols[ci],nv.slice(0,16),'col:'+ci) }
     if(TOP.length){ var tp=TOP.map(disp).filter(function(it){return it&&TONO[it.line]&&!esComplemento(it)}).slice(0,16);
       h+=rowHtml('rtop','Lo que más piden las manicuras','Los tonos más pedidos del último año',tp,'') }
     var fn=META.fams.indexOf('Nudes y neutros');
-    if(fn>=0){ var nu=ITEMS.filter(function(it){return it.fam===fn}); if(RANK) nu.sort(porRank);
+    if(fn>=0){ var nu=ITEMS.filter(function(it){return it.fam===fn&&!it.soloOut}); if(RANK) nu.sort(porRank);
       h+=rowHtml('rnud','Nudes que no fallan','Los neutros que siempre se piden',nu.slice(0,16),'fam:'+fn) }
     return h;
   }
