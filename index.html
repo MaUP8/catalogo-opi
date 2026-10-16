@@ -195,6 +195,26 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
 .btn.sec{background:var(--ground);color:var(--ink);border-color:#000}
 .btn[disabled]{opacity:.5;cursor:default}
 .hint{font-size:12px;color:var(--mute);margin:0}
+.alta{display:flex;flex-direction:column;gap:6px}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.35;cursor:pointer}
+.chk input{width:18px;height:18px;margin:0;flex:none;accent-color:#000}
+.altaok{font-size:12.5px;margin:0;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
+.altaok button{font:inherit;font-size:12px;font-weight:500;text-decoration:underline;border:0;background:none;color:var(--ink);padding:0;cursor:pointer}
+.form{overflow:auto;padding:14px 20px 6px;display:flex;flex-direction:column;gap:14px}
+.form .intro{font-size:13px;margin:0;line-height:1.4}
+.form label.f{display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:500;letter-spacing:.05em;text-transform:uppercase}
+.form label.f small{text-transform:none;letter-spacing:0;font-weight:400;color:var(--mute)}
+.form input[type=text],.form input[type=email],.form input[type=tel],.form select{font:inherit;font-size:16px;letter-spacing:0;text-transform:none;padding:8px 2px;border:0;border-bottom:1px solid #000;border-radius:0;background:var(--ground);color:var(--ink);width:100%}
+.form .dos{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fotos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.foto{position:relative;border:1px dashed #000;border-radius:14px;padding:14px 10px;text-align:center;font-size:12px;cursor:pointer;display:flex;flex-direction:column;gap:4px;align-items:center}
+.foto b{font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;font-weight:500}
+.foto input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.foto.ok{border-style:solid;background:var(--soft)}
+.foto.err{border-color:#b3124f;color:#b3124f}
+.ferr{font-size:12.5px;font-weight:600;color:#b3124f;margin:0}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+@media (max-width:420px){.form .dos{grid-template-columns:1fr}}
 .plist{background:var(--soft);border:1px solid var(--line);padding:10px;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;max-height:22vh;overflow:auto;user-select:all}
 .empty{padding:64px var(--gutter);text-align:center;color:var(--mute);text-transform:uppercase;letter-spacing:.08em;font-size:13px}
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:#000;color:#fff;padding:12px var(--gutter) calc(12px + env(safe-area-inset-bottom,0px))}
@@ -305,6 +325,10 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
       <p class="ginfo" id="ginfo" hidden></p>
       <label class="telw" id="telw" hidden>Enviar el pedido a <select id="tel" aria-label="Enviar el pedido a"></select></label>
       <p class="minw" id="minw" hidden></p>
+      <div class="alta" id="alta" hidden>
+        <label class="chk"><input type="checkbox" id="altaon"> <span>Es mi primera compra: quiero darme de alta como clienta</span></label>
+        <p class="altaok" id="altaok" hidden></p>
+      </div>
       <div class="acts">
         <a class="btn pri" id="wa" target="_blank" rel="noopener">Realizar pedido</a>
         <button class="btn sec" id="pdf" type="button">Descargar pedido en PDF</button>
@@ -314,6 +338,40 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
       </div>
       <p class="hint" id="hint">Realizar pedido abre WhatsApp con el detalle listo para enviar.</p>
     </div>
+  </div>
+</div>
+<div class="sheet" id="datos" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="dtitle">
+    <div class="phead"><h2 id="dtitle">Tus datos para el alta</h2><button class="x" id="dclose" type="button" aria-label="Cerrar">×</button></div>
+    <form class="form" id="dform" novalidate autocomplete="on">
+      <p class="intro">Los necesitamos una sola vez, para facturarte y enviarte el pedido. Quedan guardados en este celular para la próxima.</p>
+      <label class="f">Nombre del salón o comercio <small>(si tenés)</small><input type="text" name="salon" autocomplete="organization" maxlength="80"></label>
+      <label class="f">Nombre y apellido<input type="text" name="nombre" autocomplete="name" maxlength="80" required></label>
+      <div class="dos">
+        <label class="f">Cédula<input type="tel" name="cedula" inputmode="numeric" maxlength="11" placeholder="1.234.567-2" required></label>
+        <label class="f">RUT <small>(si facturás con RUT)</small><input type="tel" name="rut" inputmode="numeric" maxlength="14"></label>
+      </div>
+      <label class="f">Dirección de entrega<input type="text" name="direccion" autocomplete="street-address" maxlength="120" required></label>
+      <div class="dos">
+        <label class="f">Localidad<input type="text" name="localidad" autocomplete="address-level2" maxlength="60" required></label>
+        <label class="f">Departamento<select name="depto" required><option value="">Elegí</option></select></label>
+      </div>
+      <div class="dos">
+        <label class="f">Mail <small>(para la factura)</small><input type="email" name="mail" autocomplete="email" maxlength="80"></label>
+        <label class="f">Agencia de envío <small>(preferida)</small><input type="text" name="agencia" list="agencias" maxlength="60"></label>
+      </div>
+      <datalist id="agencias"><option value="DAC"><option value="UES"><option value="Agencia de ómnibus"></datalist>
+      <div class="f" style="font-size:11.5px;font-weight:500;letter-spacing:.05em;text-transform:uppercase">Foto de tu cédula</div>
+      <div class="fotos">
+        <label class="foto" id="ffrente"><b>Frente</b><span>Tocá para sacar o elegir la foto</span><input type="file" accept="image/*" data-lado="frente"></label>
+        <label class="foto" id="fdorso"><b>Dorso</b><span>Tocá para sacar o elegir la foto</span><input type="file" accept="image/*" data-lado="dorso"></label>
+      </div>
+      <label class="hp" aria-hidden="true">Web<input type="text" name="web" tabindex="-1" autocomplete="off"></label>
+      <label class="chk"><input type="checkbox" name="ok" required> <span>Autorizo a Delarin S.A. a usar estos datos y la foto de mi cédula solo para darme de alta como clienta y facturar mis pedidos.</span></label>
+      <p class="ferr" id="ferr" hidden></p>
+    </form>
+    <div class="pfoot"><div class="acts"><button class="btn pri" id="dok" type="button">Guardar datos</button></div>
+      <p class="hint">Si la foto no sube, no pasa nada: el pedido sale igual y la mandás por WhatsApp.</p></div>
   </div>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -327,13 +385,19 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
   // Variantes de la carta: misma data, distinto teléfono y pedido mínimo según la ruta.
   var VAR={
     montevideo:{tel:'59892775633', minimo:4500, bajoMinimo:'bloquea', sub:'Carta para profesionales', video:'img/outlet.mp4?v=3'},
-    interior:{tel:'59898010236', minimo:7500, bajoMinimo:'publico', sub:'Carta para profesionales · Interior del país', video:'img/outlet-interior.mp4?v=3'}
+    interior:{tel:'59898010236', minimo:7500, bajoMinimo:'publico', sub:'Carta para profesionales · Interior del país', video:'img/outlet-interior.mp4?v=3',
+      altas:''}   // URL /exec del Apps Script de altas (cuenta info@pbgroup.com.uy); vacío = sin bloque de alta
   };
   var CFG=VAR[window.VARIANTE||(/\/interior(\/|$)/.test(location.pathname)?'interior':'montevideo')];
   var MINIMO=CFG.minimo, OUTLET=-2, TONO={0:1,1:1,2:1,3:1,4:1}, TELS=[{nombre:'',tel:CFG.tel}], OUTLET_ON=true, OCULTOS={};
   try{S.sel=JSON.parse(localStorage.getItem('opi-qty')||'{}')||{}}catch(e){S.sel={}}
   try{S.gift=JSON.parse(localStorage.getItem('opi-gift')||'{}')||{}}catch(e){S.gift={}}
   var phone=CFG.tel, PUB=false;
+  // Alta de clientas nuevas y referencia del prospecto (?ref=P0412, la arma la lista de Silvana).
+  var ALTA={url:CFG.altas||''}, A={on:false,ok:false,d:{},fotos:{},sent:''}, REF='';
+  try{ var a0=JSON.parse(localStorage.getItem('opi-alta')||'null'); if(a0&&typeof a0==='object'){ A.on=!!a0.on; A.ok=!!a0.ok; A.d=a0.d||{}; A.fotos=a0.fotos||{}; A.sent=a0.sent||'' } }catch(e){}
+  (function(){ var m=/[?&]ref=([A-Za-z0-9-]{1,20})/.exec(location.search||''); try{ if(m) localStorage.setItem('opi-ref',m[1]); REF=m?m[1]:(localStorage.getItem('opi-ref')||'') }catch(e){ REF=m?m[1]:'' } })();
+  var DEPTOS=['Artigas','Canelones','Cerro Largo','Colonia','Durazno','Flores','Florida','Lavalleja','Maldonado','Montevideo','Paysandú','Río Negro','Rivera','Rocha','Salto','San José','Soriano','Tacuarembó','Treinta y Tres'];
   // Configuración editable desde el portal de administración (data/config.json y data/ajustes.json).
   function applyCfg(c,aj){
     c=c||{};
@@ -568,6 +632,11 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     out.push(''); var gu=0; G.forEach(function(it){ gu+=S.gift[it.key] });
     out.push('Total: '+units+(units===1?' unidad':' unidades')+(gu?' + '+gu+(gu===1?' obsequio':' obsequios'):'')+(tot&&all?' · '+money(tot)+' con impuestos ('+lista(t)+')':''));
     if(link){ out.push(''); out.push('Ver pedido con fotos: '+link) }
+    if(ALTA.url&&A.on&&altaCompleta()){ var d=A.d; out.push(''); out.push('Primera compra · datos para el alta:');
+      out.push('- '+d.nombre+(d.salon?' · '+d.salon:'')); out.push('- Cédula '+fmtCi(d.cedula)+(d.rut?' · RUT '+d.rut:''));
+      out.push('- '+d.direccion+', '+d.localidad+' ('+d.depto+')'); if(d.mail) out.push('- '+d.mail); if(d.agencia) out.push('- Envío por '+d.agencia);
+      out.push('- Foto de cédula: '+(A.fotos.frente&&A.fotos.dorso?'enviada':'la mando por este chat')) }
+    if(REF){ out.push(''); out.push('Ref. '+REF) }
     return out.join('\n');
   }
   function orderLink(C){
@@ -741,7 +810,10 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
   $('ginfo').addEventListener('click',onQty);
   $('tel').addEventListener('change',function(){ phone=this.value; try{ localStorage.setItem('opi-tel',phone) }catch(e){} bar() });
   $('obox').addEventListener('click',function(ev){ if(ev.target.closest('#ovb')){ vidOpen('ohelp','ohelpv','osnd',false); return } var b=ev.target.closest('[data-osys]'); if(!b) return; S.osys=+b.getAttribute('data-osys'); buildCols(); render() });
-  $('wa').addEventListener('click',function(ev){ if(this.getAttribute('aria-disabled')==='true'){ ev.preventDefault(); toast('El pedido mínimo es '+money(MINIMO)) } });
+  $('wa').addEventListener('click',function(ev){
+    if(this.getAttribute('aria-disabled')==='true'){ ev.preventDefault(); toast('El pedido mínimo es '+money(MINIMO)); return }
+    if(ALTA.url&&A.on){ if(!altaCompleta()){ ev.preventDefault(); datosOpen(); return } enviarAlta() }
+  });
   $('open').addEventListener('click',function(){ $('sheet').hidden=false; cart() });
   $('cartb').addEventListener('click',function(){ if(chosen().length){ $('sheet').hidden=false; cart() } else toast('Tu pedido está vacío') });
   $('grid').addEventListener('click',function(ev){ if(ev.target.closest('#goout2')){ setLine(OUTLET); window.scrollTo({top:$('grid').getBoundingClientRect().top+window.scrollY-160,behavior:'smooth'}) } });
@@ -784,6 +856,82 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
   $('help').addEventListener('click',function(ev){ if(ev.target===this) helpClose() });
   $('q').addEventListener('input',function(){ S.q=this.value; render() });
   $('clear').addEventListener('click',function(){ S.sel={}; S.gift={}; save(); render(); bar() });
+  // ---------- Alta de clientas nuevas (solo variantes con CFG.altas) ----------
+  function altaInit(){
+    if(!ALTA.url) return;
+    $('alta').hidden=false; $('altaon').checked=!!A.on; altaPaint();
+    var sel=document.querySelector('#dform select[name=depto]');
+    sel.innerHTML+=DEPTOS.map(function(d){return '<option>'+d+'</option>'}).join('');
+    $('altaon').addEventListener('change',function(){ A.on=this.checked; altaSave(); altaPaint(); bar(); if(A.on&&!altaCompleta()) datosOpen() });
+    $('altaok').addEventListener('click',function(ev){ if(ev.target.closest('button')) datosOpen() });
+    $('dclose').addEventListener('click',datosClose);
+    $('datos').addEventListener('click',function(ev){ if(ev.target===this) datosClose() });
+    $('dok').addEventListener('click',datosGuardar);
+    Array.prototype.forEach.call(document.querySelectorAll('.foto input'),function(inp){ inp.addEventListener('change',function(){ if(this.files&&this.files[0]) subirFoto(this.getAttribute('data-lado'),this.files[0]); this.value='' }) });
+  }
+  function altaSave(){ try{ localStorage.setItem('opi-alta',JSON.stringify(A)) }catch(e){} }
+  function altaCompleta(){ var d=A.d||{}; return !!(A.ok&&d.nombre&&ciOk(d.cedula)&&d.direccion&&d.localidad&&d.depto) }
+  function altaPaint(){
+    var p=$('altaok'); p.hidden=!A.on;
+    if(!A.on) return;
+    p.innerHTML=altaCompleta()?'<span>✓ Datos de '+esc(A.d.nombre)+(A.fotos.frente&&A.fotos.dorso?' · cédula recibida':' · falta la foto de la cédula')+'</span><button type="button">Editar</button>':'<span>Faltan tus datos.</span><button type="button">Completar</button>';
+  }
+  function datosOpen(){
+    var f=$('dform'), d=A.d||{};
+    ['salon','nombre','cedula','rut','direccion','localidad','depto','mail','agencia'].forEach(function(k){ if(f.elements[k]) f.elements[k].value=d[k]||'' });
+    f.elements.ok.checked=!!A.ok; $('ferr').hidden=true; fotoPaint('frente'); fotoPaint('dorso');
+    $('datos').hidden=false;
+  }
+  function datosClose(){ $('datos').hidden=true }
+  function datosGuardar(){
+    var f=$('dform'), d={}, err='';
+    ['salon','nombre','cedula','rut','direccion','localidad','depto','mail','agencia'].forEach(function(k){ d[k]=String(f.elements[k].value||'').trim() });
+    if(!d.nombre) err='Falta tu nombre y apellido.';
+    else if(!ciOk(d.cedula)) err='Revisá el número de cédula.';
+    else if(!d.direccion||!d.localidad||!d.depto) err='Falta la dirección, la localidad o el departamento.';
+    else if(d.mail&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.mail)) err='Revisá el mail.';
+    else if(!f.elements.ok.checked) err='Para darte de alta necesitamos tu autorización (la casilla de abajo).';
+    if(f.elements.web.value) err='';
+    if(err){ $('ferr').textContent=err; $('ferr').hidden=false; return }
+    d.cedula=d.cedula.replace(/\D/g,''); A.d=d; A.ok=true; A.on=true; A.sent=''; $('altaon').checked=true;
+    altaSave(); altaPaint(); bar(); datosClose();
+    toast(A.fotos.frente&&A.fotos.dorso?'Datos guardados':'Datos guardados. Si podés, sumá la foto de la cédula');
+  }
+  // Cédula uruguaya: 6 o 7 dígitos + dígito verificador (pesos 2 9 8 7 6 3 4).
+  function ciOk(v){ var c=String(v||'').replace(/\D/g,''); if(c.length<7||c.length>8) return false; var b=('0'+c).slice(-8), s=0, w=[2,9,8,7,6,3,4];
+    for(var i=0;i<7;i++) s+=(+b[i])*w[i]; return (10-s%10)%10===+b[7] }
+  function fmtCi(v){ var c=String(v||'').replace(/\D/g,''); if(c.length<7) return c; var n=c.slice(0,-1); return n.replace(/\B(?=(\d{3})+(?!\d))/g,'.')+'-'+c.slice(-1) }
+  function fotoPaint(lado,estado){
+    var el=$('f'+lado), sp=el.querySelector('span'); el.classList.remove('ok','err');
+    if(estado==='sub'){ sp.textContent='Subiendo…'; return }
+    if(estado==='err'){ el.classList.add('err'); sp.textContent='No se pudo subir. Probá de nuevo o mandala por WhatsApp'; return }
+    if(A.fotos[lado]){ el.classList.add('ok'); sp.textContent='✓ Recibida · tocá para cambiarla' } else sp.textContent='Tocá para sacar o elegir la foto';
+  }
+  function comprimir(file){
+    return new Promise(function(ok,ko){
+      var url=URL.createObjectURL(file), img=new Image();
+      img.onload=function(){ var k=Math.min(1,1600/Math.max(img.naturalWidth,img.naturalHeight)), c=document.createElement('canvas');
+        c.width=Math.round(img.naturalWidth*k); c.height=Math.round(img.naturalHeight*k); c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        URL.revokeObjectURL(url); ok(c.toDataURL('image/jpeg',0.75).split(',')[1]) };
+      img.onerror=function(){ URL.revokeObjectURL(url); ko(new Error('imagen')) }; img.src=url;
+    });
+  }
+  function subirFoto(lado,file){
+    fotoPaint(lado,'sub');
+    comprimir(file).then(function(b64){
+      return fetch(ALTA.url,{method:'POST',body:JSON.stringify({tipo:'foto',lado:lado,ref:REF,img:b64})}).then(function(r){return r.json()});
+    }).then(function(j){ if(!j||!j.ok) throw new Error(j&&j.error||'error'); A.fotos[lado]=j.id; A.sent=''; altaSave(); fotoPaint(lado); altaPaint(); bar() })
+      .catch(function(){ fotoPaint(lado,'err') });
+  }
+  function enviarAlta(){
+    var t=totals(), firma=JSON.stringify([A.d,A.fotos]);
+    if(A.sent===firma) return;                       // ya enviada con estos mismos datos
+    var cuerpo={tipo:'alta',ref:REF,datos:A.d,fotos:A.fotos,consentimiento:true,web:$('dform').elements.web.value,
+      pedido:t.units+(t.units===1?' unidad':' unidades')+(t.tot?' · '+money(t.tot)+' ('+lista(t)+')':'')};
+    try{ fetch(ALTA.url,{method:'POST',body:JSON.stringify(cuerpo),keepalive:true,mode:'no-cors'}) }catch(e){}
+    A.sent=firma; altaSave();
+  }
+  altaInit();
   window.__pdf=buildPdf;
 })();
 </script>

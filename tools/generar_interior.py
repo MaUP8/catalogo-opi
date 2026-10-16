@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Arma el sitio del Catálogo OPI · Interior del país (repo MaUP8/catalogo-opi-interior)
+"""Arma el sitio del Catálogo OPI · Interior del país (repo catalogospbg/catalogo-opi-interior)
 a partir de este repo. Uso: python3 tools/generar_interior.py [carpeta_destino]
 (por defecto ../catalogo-opi-interior, el clon local del repo del interior).
 
@@ -13,7 +13,7 @@ import os, re, sys, shutil
 base = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 dest = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else os.path.join(base, '..', 'catalogo-opi-interior'))
 s = open(os.path.join(base, 'index.html'), encoding='utf-8').read()
-s = s.replace('<!doctype html>', '<!doctype html>\n<!-- Generado desde MaUP8/catalogo-opi con tools/generar_interior.py: no editar a mano. -->', 1)
+s = s.replace('<!doctype html>', '<!doctype html>\n<!-- Generado desde catalogospbg/catalogo-opi con tools/generar_interior.py: no editar a mano. -->', 1)
 s = re.sub(r'<title>.*?</title>', '<title>Catálogo OPI · Interior del país</title>', s, count=1)
 s = s.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf',
               "<script>window.VARIANTE='interior'</script>\n<script src=\"https://cdnjs.cloudflare.com/ajax/libs/jspdf", 1)
