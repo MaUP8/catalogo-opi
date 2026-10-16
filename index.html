@@ -157,11 +157,11 @@ main{padding-block:0 140px;padding-inline:var(--gutter)}
 .gsec{padding:14px 0 2px;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
 .it.gi .sub{color:var(--mute)}
 .telw{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;letter-spacing:.04em}
-.telw select{flex:1;min-width:0;font:inherit;padding:8px 2px;border:0;border-bottom:1px solid #000;background:var(--ground);color:var(--ink)}
+.telw select{flex:1;min-width:0;font:inherit;font-size:16px;padding:8px 2px;border:0;border-bottom:1px solid #000;background:var(--ground);color:var(--ink)}
 .minw{font-size:13px;font-weight:600;color:#b3124f;margin:0}
 .ginfo{font-size:13px;margin:0;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
 .ginfo button{font:inherit;font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:999px;border:0;background:var(--soft);color:#000;cursor:pointer}
-a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
+a.btn[aria-disabled="true"]{opacity:.35}
 .qty{display:flex;align-items:center;justify-content:space-between;gap:4px;border:1px solid #000;border-radius:999px;padding:2px;margin-top:auto;background:#000;color:#fff}
 .qty button{font:inherit;font-weight:500;font-size:17px;line-height:1;width:32px;height:32px;border-radius:50%;border:0;background:#fff;color:#000;cursor:pointer}
 .qty output{font-weight:600;font-variant-numeric:tabular-nums;min-width:2ch;text-align:center}
@@ -170,11 +170,23 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
 .del{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;border:0;background:#000;color:#fff;display:grid;place-items:center;cursor:pointer;z-index:2}
 .del svg,.rm svg{width:16px;height:16px;display:block}
 .sheet{position:fixed;inset:0;z-index:8;background:rgba(0,0,0,.42);display:flex;align-items:flex-end;justify-content:center}
-.panel{background:var(--ground);color:var(--ink);width:min(720px,100%);max-height:88%;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0px)}
+.panel{background:var(--ground);color:var(--ink);width:min(720px,100%);max-height:88%;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(max-width:640px){#sheet .panel,#datos .panel{height:100%;max-height:none}#sheet .phead,#datos .phead{padding:12px 16px}}
+html:has(#sheet:not([hidden])),html:has(#datos:not([hidden])){overflow:hidden}
+.pbody{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.pinfo{padding:16px 20px 22px;display:flex;flex-direction:column;gap:14px}
+.pbar{border-top:1px solid var(--line);padding:10px 16px 12px;display:flex;flex-direction:column;gap:8px;background:var(--ground);box-shadow:0 -8px 18px rgba(0,0,0,.06)}
+.pbar .btn{width:100%;text-align:center;padding:16px 22px;font-size:13.5px}
+.pbar .tot{align-items:center}
+.pbar .tot small{display:block}
+.wnote{font-size:13px;font-weight:600;color:#b3124f;margin:0;text-align:center}
+.more{display:flex;flex-wrap:wrap;gap:4px 22px}
+.lnk{font:inherit;font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;text-decoration:underline;text-underline-offset:3px;background:none;border:0;padding:8px 0;color:var(--ink);cursor:pointer}
+.lnk[disabled]{opacity:.5;cursor:default}
 .phead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px;border-bottom:1px solid var(--line)}
 .phead h2{font-family:var(--display);font-weight:500;font-size:22px;margin:0;letter-spacing:-.01em}
 .x{font:inherit;font-size:24px;line-height:1;width:38px;height:38px;border-radius:50%;border:0;background:var(--soft);color:var(--ink);cursor:pointer}
-.items{overflow:auto;padding:4px 20px;display:flex;flex-direction:column}
+.items{padding:4px 20px;display:flex;flex-direction:column}
 .it{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:4px 14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
 .it .th{grid-row:span 2;display:block;width:44px;height:76px;object-fit:contain;background-color:#fff}
 .it .t{min-width:0}
@@ -187,7 +199,7 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
 .pfoot{border-top:1px solid var(--line);padding:14px 20px;display:flex;flex-direction:column;gap:12px}
 .tot{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-weight:500}
 .tot small{font-weight:400;color:var(--mute);font-size:12px}
-.tot strong{font-family:var(--display);font-weight:600;font-size:22px;font-variant-numeric:tabular-nums}
+.tot strong{font-family:var(--display);font-weight:600;font-size:22px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .acts{display:flex;flex-wrap:wrap;gap:8px}
 .acts .btn{flex:1 1 150px;text-align:center}
 .btn{font:inherit;font-size:12.5px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:13px 22px;border-radius:999px;border:1px solid transparent;cursor:pointer;text-decoration:none;display:inline-block}
@@ -195,12 +207,18 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
 .btn.sec{background:var(--ground);color:var(--ink);border-color:#000}
 .btn[disabled]{opacity:.5;cursor:default}
 .hint{font-size:12px;color:var(--mute);margin:0}
-.alta{display:flex;flex-direction:column;gap:6px}
+.alta{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:16px;background:var(--soft);scroll-margin:20px}
+.alta .aq{font-size:14.5px;font-weight:600;margin:0}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg button{font:inherit;font-size:14px;font-weight:500;line-height:1.2;min-height:54px;padding:10px 12px;border-radius:14px;border:1px solid #000;background:var(--ground);color:var(--ink);cursor:pointer}
+.seg button[aria-checked="true"]{background:#000;color:#fff}
+.alta.flash{animation:flash .5s 3}
+@keyframes flash{50%{box-shadow:0 0 0 3px #b3124f}}
 .chk{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.35;cursor:pointer}
 .chk input{width:18px;height:18px;margin:0;flex:none;accent-color:#000}
-.altaok{font-size:12.5px;margin:0;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
-.altaok button{font:inherit;font-size:12px;font-weight:500;text-decoration:underline;border:0;background:none;color:var(--ink);padding:0;cursor:pointer}
-.form{overflow:auto;padding:14px 20px 6px;display:flex;flex-direction:column;gap:14px}
+.altaok{font-size:13px;margin:0;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
+.altaok button{font:inherit;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border:0;border-radius:999px;background:#000;color:#fff;padding:9px 16px;cursor:pointer}
+.form{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding:14px 20px 6px;display:flex;flex-direction:column;gap:14px}
 .form .intro{font-size:13px;margin:0;line-height:1.4}
 .form label.f{display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:500;letter-spacing:.05em;text-transform:uppercase}
 .form label.f small{text-transform:none;letter-spacing:0;font-weight:400;color:var(--mute)}
@@ -213,7 +231,7 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
 .foto.ok{border-style:solid;background:var(--soft)}
 .foto.err{border-color:#b3124f;color:#b3124f}
 .ferr{font-size:12.5px;font-weight:600;color:#b3124f;margin:0}
-.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.trampa{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 @media (max-width:420px){.form .dos{grid-template-columns:1fr}}
 .plist{background:var(--soft);border:1px solid var(--line);padding:10px;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;max-height:22vh;overflow:auto;user-select:all}
 .empty{padding:64px var(--gutter);text-align:center;color:var(--mute);text-transform:uppercase;letter-spacing:.08em;font-size:13px}
@@ -223,7 +241,8 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
 .bar .n span{display:block;font-weight:350;font-size:12px;color:#bdbab6}
 .btn.wa{background:#fff;color:#000}
 .btn.ghost{background:transparent;color:#fff;border-color:#fff}
-.toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:#000;color:#fff;padding:10px 18px;border-radius:999px;font-size:12.5px;letter-spacing:.04em;z-index:7}
+.toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:#000;color:#fff;padding:10px 18px;border-radius:999px;font-size:12.5px;letter-spacing:.04em;z-index:20;max-width:calc(100% - 32px);text-align:center}
+html:has(#sheet:not([hidden])) .toast,html:has(#datos:not([hidden])) .toast{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
 .list{width:100%;background:#1c1c1c;color:#fff;border:1px solid #555;padding:10px;font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;max-height:30vh;overflow:auto;user-select:all}
 @media (prefers-reduced-motion:reduce){.pic,.add{transition:none}.pick:hover .pic{transform:none}}
 </style>
@@ -319,24 +338,31 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
 <div class="sheet" id="sheet" hidden>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="ptitle">
     <div class="phead"><h2 id="ptitle">Tu pedido</h2><button class="x" id="close" type="button" aria-label="Cerrar">×</button></div>
-    <div class="items" id="items"></div>
-    <div class="pfoot">
+    <div class="pbody" id="pbody">
+      <div class="items" id="items"></div>
+      <div class="pinfo">
+        <p class="ginfo" id="ginfo" hidden></p>
+        <p class="minw" id="minw" hidden></p>
+        <div class="alta" id="alta" hidden>
+          <p class="aq">¿Ya compraste con nosotros?</p>
+          <div class="seg" role="radiogroup" aria-label="¿Ya compraste con nosotros?">
+            <button type="button" role="radio" aria-checked="false" data-tipo="clienta">Sí, ya soy clienta</button>
+            <button type="button" role="radio" aria-checked="false" data-tipo="nueva">No, es mi primer pedido</button>
+          </div>
+          <p class="altaok" id="altaok" hidden></p>
+        </div>
+        <label class="telw" id="telw" hidden>Enviar el pedido a <select id="tel" aria-label="Enviar el pedido a"></select></label>
+        <div class="more">
+          <button class="lnk" id="pdf" type="button">Descargar pedido en PDF</button>
+          <button class="lnk" id="clear" type="button">Vaciar pedido</button>
+        </div>
+        <p class="hint" id="hint">Realizar pedido abre WhatsApp con el detalle listo para enviar.</p>
+      </div>
+    </div>
+    <div class="pbar">
       <div class="tot"><span id="totn"></span><strong id="tot"></strong></div>
-      <p class="ginfo" id="ginfo" hidden></p>
-      <label class="telw" id="telw" hidden>Enviar el pedido a <select id="tel" aria-label="Enviar el pedido a"></select></label>
-      <p class="minw" id="minw" hidden></p>
-      <div class="alta" id="alta" hidden>
-        <label class="chk"><input type="checkbox" id="altaon"> <span>Es mi primera compra: quiero darme de alta como clienta</span></label>
-        <p class="altaok" id="altaok" hidden></p>
-      </div>
-      <div class="acts">
-        <a class="btn pri" id="wa" target="_blank" rel="noopener">Realizar pedido</a>
-        <button class="btn sec" id="pdf" type="button">Descargar pedido en PDF</button>
-      </div>
-      <div class="acts">
-        <button class="btn sec" id="clear" type="button">Vaciar pedido</button>
-      </div>
-      <p class="hint" id="hint">Realizar pedido abre WhatsApp con el detalle listo para enviar.</p>
+      <p class="wnote" id="wnote" hidden></p>
+      <a class="btn pri" id="wa" target="_blank" rel="noopener">Realizar pedido</a>
     </div>
   </div>
 </div>
@@ -366,7 +392,7 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
         <label class="foto" id="ffrente"><b>Frente</b><span>Tocá para sacar o elegir la foto</span><input type="file" accept="image/*" data-lado="frente"></label>
         <label class="foto" id="fdorso"><b>Dorso</b><span>Tocá para sacar o elegir la foto</span><input type="file" accept="image/*" data-lado="dorso"></label>
       </div>
-      <label class="hp" aria-hidden="true">Web<input type="text" name="web" tabindex="-1" autocomplete="off"></label>
+      <label class="trampa" aria-hidden="true">Web<input type="text" name="web" tabindex="-1" autocomplete="off"></label>
       <label class="chk"><input type="checkbox" name="ok" required> <span>Autorizo a Delarin S.A. a usar estos datos y la foto de mi cédula solo para darme de alta como clienta y facturar mis pedidos.</span></label>
       <p class="ferr" id="ferr" hidden></p>
     </form>
@@ -394,8 +420,10 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
   try{S.gift=JSON.parse(localStorage.getItem('opi-gift')||'{}')||{}}catch(e){S.gift={}}
   var phone=CFG.tel, PUB=false;
   // Alta de clientas nuevas y referencia del prospecto (?ref=P0412, la arma la lista de Silvana).
-  var ALTA={url:CFG.altas||''}, A={on:false,ok:false,d:{},fotos:{},sent:''}, REF='';
-  try{ var a0=JSON.parse(localStorage.getItem('opi-alta')||'null'); if(a0&&typeof a0==='object'){ A.on=!!a0.on; A.ok=!!a0.ok; A.d=a0.d||{}; A.fotos=a0.fotos||{}; A.sent=a0.sent||'' } }catch(e){}
+  // A.tipo: 'clienta' o 'nueva'; si ya mandó el alta, la próxima vez arranca como clienta.
+  var ALTA={url:CFG.altas||''}, A={tipo:'',ok:false,d:{},fotos:{},sent:''}, REF='', BLOQ='';
+  try{ var a0=JSON.parse(localStorage.getItem('opi-alta')||'null'); if(a0&&typeof a0==='object'){ A.tipo=a0.tipo||(a0.on?'nueva':''); A.ok=!!a0.ok; A.d=a0.d||{}; A.fotos=a0.fotos||{}; A.sent=a0.sent||'';
+    if(A.tipo==='nueva'&&A.sent) A.tipo='clienta' } }catch(e){}
   (function(){ var m=/[?&]ref=([A-Za-z0-9-]{1,20})/.exec(location.search||''); try{ if(m) localStorage.setItem('opi-ref',m[1]); REF=m?m[1]:(localStorage.getItem('opi-ref')||'') }catch(e){ REF=m?m[1]:'' } })();
   var DEPTOS=['Artigas','Canelones','Cerro Largo','Colonia','Durazno','Flores','Florida','Lavalleja','Maldonado','Montevideo','Paysandú','Río Negro','Rivera','Rocha','Salto','San José','Soriano','Tacuarembó','Treinta y Tres'];
   // Configuración editable desde el portal de administración (data/config.json y data/ajustes.json).
@@ -632,10 +660,11 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     out.push(''); var gu=0; G.forEach(function(it){ gu+=S.gift[it.key] });
     out.push('Total: '+units+(units===1?' unidad':' unidades')+(gu?' + '+gu+(gu===1?' obsequio':' obsequios'):'')+(tot&&all?' · '+money(tot)+' con impuestos ('+lista(t)+')':''));
     if(link){ out.push(''); out.push('Ver pedido con fotos: '+link) }
-    if(ALTA.url&&A.on&&altaCompleta()){ var d=A.d; out.push(''); out.push('Primera compra · datos para el alta:');
+    if(ALTA.url&&A.tipo==='nueva'&&altaCompleta()){ var d=A.d; out.push(''); out.push('Primera compra · datos para el alta:');
       out.push('- '+d.nombre+(d.salon?' · '+d.salon:'')); out.push('- Cédula '+fmtCi(d.cedula)+(d.rut?' · RUT '+d.rut:''));
       out.push('- '+d.direccion+', '+d.localidad+' ('+d.depto+')'); if(d.mail) out.push('- '+d.mail); if(d.agencia) out.push('- Envío por '+d.agencia);
       out.push('- Foto de cédula: '+(A.fotos.frente&&A.fotos.dorso?'enviada':'la mando por este chat')) }
+    else if(ALTA.url&&A.tipo==='clienta'){ out.push(''); out.push('Ya soy clienta.') }
     if(REF){ out.push(''); out.push('Ref. '+REF) }
     return out.join('\n');
   }
@@ -666,8 +695,13 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     if(!t.C.length){ $('sheet').hidden=true; return }
     var falta=t.falta;
     $('barn').innerHTML=t.units+(t.units===1?' unidad':' unidades')+' en '+t.C.length+(t.C.length===1?' producto':' productos')+(t.gu?' + '+t.gu+(t.gu===1?' regalo':' regalos'):'')+'<span>'+(t.tot?money(t.tot)+' con impuestos'+(t.pub?' · precio consumidor final':(falta>0?' · mínimo '+money(MINIMO):'')):'Armá el pedido y envialo')+'</span>';
-    var wa=$('wa');
-    if(falta>0&&!PUB){ wa.removeAttribute('href'); wa.setAttribute('aria-disabled','true') }
+    var wa=$('wa'), why='';
+    BLOQ=(falta>0&&!PUB)?'min':(ALTA.url&&!A.tipo)?'tipo':(ALTA.url&&A.tipo==='nueva'&&!altaCompleta())?'datos':'';
+    if(BLOQ==='min') why='Pedido mínimo '+money(MINIMO)+' a precio profesional: te faltan '+money(falta)+'.';
+    if(BLOQ==='tipo') why='Para seguir, contanos arriba si ya sos clienta.';
+    if(BLOQ==='datos') why='Para seguir, completá tus datos para el alta.';
+    $('wnote').hidden=!why; $('wnote').textContent=why;
+    if(BLOQ){ wa.removeAttribute('href'); wa.setAttribute('aria-disabled','true') }
     else { wa.href='https://wa.me/'+phone+'?text='+encodeURIComponent(message()); wa.removeAttribute('aria-disabled') }
     if(!$('sheet').hidden) cart();
   }
@@ -811,8 +845,12 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
   $('tel').addEventListener('change',function(){ phone=this.value; try{ localStorage.setItem('opi-tel',phone) }catch(e){} bar() });
   $('obox').addEventListener('click',function(ev){ if(ev.target.closest('#ovb')){ vidOpen('ohelp','ohelpv','osnd',false); return } var b=ev.target.closest('[data-osys]'); if(!b) return; S.osys=+b.getAttribute('data-osys'); buildCols(); render() });
   $('wa').addEventListener('click',function(ev){
-    if(this.getAttribute('aria-disabled')==='true'){ ev.preventDefault(); toast('El pedido mínimo es '+money(MINIMO)); return }
-    if(ALTA.url&&A.on){ if(!altaCompleta()){ ev.preventDefault(); datosOpen(); return } enviarAlta() }
+    if(BLOQ){ ev.preventDefault();
+      if(BLOQ==='min') toast('El pedido mínimo es '+money(MINIMO));
+      else if(BLOQ==='datos') datosOpen();
+      else { var al=$('alta'); al.scrollIntoView({behavior:'smooth',block:'center'}); al.classList.remove('flash'); void al.offsetWidth; al.classList.add('flash') }
+      return }
+    if(ALTA.url&&A.tipo==='nueva') enviarAlta()
   });
   $('open').addEventListener('click',function(){ $('sheet').hidden=false; cart() });
   $('cartb').addEventListener('click',function(){ if(chosen().length){ $('sheet').hidden=false; cart() } else toast('Tu pedido está vacío') });
@@ -859,10 +897,11 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
   // ---------- Alta de clientas nuevas (solo variantes con CFG.altas) ----------
   function altaInit(){
     if(!ALTA.url) return;
-    $('alta').hidden=false; $('altaon').checked=!!A.on; altaPaint();
+    $('alta').hidden=false; altaPaint();
     var sel=document.querySelector('#dform select[name=depto]');
     sel.innerHTML+=DEPTOS.map(function(d){return '<option>'+d+'</option>'}).join('');
-    $('altaon').addEventListener('change',function(){ A.on=this.checked; altaSave(); altaPaint(); bar(); if(A.on&&!altaCompleta()) datosOpen() });
+    $('alta').addEventListener('click',function(ev){ var b=ev.target.closest('[data-tipo]'); if(!b) return;
+      A.tipo=b.getAttribute('data-tipo'); this.classList.remove('flash'); altaSave(); altaPaint(); bar(); if(A.tipo==='nueva'&&!altaCompleta()) datosOpen() });
     $('altaok').addEventListener('click',function(ev){ if(ev.target.closest('button')) datosOpen() });
     $('dclose').addEventListener('click',datosClose);
     $('datos').addEventListener('click',function(ev){ if(ev.target===this) datosClose() });
@@ -872,9 +911,10 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
   function altaSave(){ try{ localStorage.setItem('opi-alta',JSON.stringify(A)) }catch(e){} }
   function altaCompleta(){ var d=A.d||{}; return !!(A.ok&&d.nombre&&ciOk(d.cedula)&&d.direccion&&d.localidad&&d.depto) }
   function altaPaint(){
-    var p=$('altaok'); p.hidden=!A.on;
-    if(!A.on) return;
-    p.innerHTML=altaCompleta()?'<span>✓ Datos de '+esc(A.d.nombre)+(A.fotos.frente&&A.fotos.dorso?' · cédula recibida':' · falta la foto de la cédula')+'</span><button type="button">Editar</button>':'<span>Faltan tus datos.</span><button type="button">Completar</button>';
+    Array.prototype.forEach.call(document.querySelectorAll('#alta [data-tipo]'),function(b){ b.setAttribute('aria-checked',String(b.getAttribute('data-tipo')===A.tipo)) });
+    var p=$('altaok'); p.hidden=A.tipo!=='nueva';
+    if(A.tipo!=='nueva') return;
+    p.innerHTML=altaCompleta()?'<span>✓ Datos de '+esc(A.d.nombre)+(A.fotos.frente&&A.fotos.dorso?' · cédula recibida':' · falta la foto de la cédula')+'</span><button type="button">Editar</button>':'<span>Necesitamos tus datos para darte de alta.</span><button type="button">Completar datos</button>';
   }
   function datosOpen(){
     var f=$('dform'), d=A.d||{};
@@ -893,7 +933,7 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
     else if(!f.elements.ok.checked) err='Para darte de alta necesitamos tu autorización (la casilla de abajo).';
     if(f.elements.web.value) err='';
     if(err){ $('ferr').textContent=err; $('ferr').hidden=false; return }
-    d.cedula=d.cedula.replace(/\D/g,''); A.d=d; A.ok=true; A.on=true; A.sent=''; $('altaon').checked=true;
+    d.cedula=d.cedula.replace(/\D/g,''); A.d=d; A.ok=true; A.tipo='nueva'; A.sent='';
     altaSave(); altaPaint(); bar(); datosClose();
     toast(A.fotos.frente&&A.fotos.dorso?'Datos guardados':'Datos guardados. Si podés, sumá la foto de la cédula');
   }
