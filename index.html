@@ -386,7 +386,7 @@ a.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
   var VAR={
     montevideo:{tel:'59892775633', minimo:4500, bajoMinimo:'bloquea', sub:'Carta para profesionales', video:'img/outlet.mp4?v=3'},
     interior:{tel:'59898010236', minimo:7500, bajoMinimo:'publico', sub:'Carta para profesionales · Interior del país', video:'img/outlet-interior.mp4?v=3',
-      altas:''}   // URL /exec del Apps Script de altas (cuenta info@pbgroup.com.uy); vacío = sin bloque de alta
+      altas:'https://script.google.com/macros/s/AKfycbwqTjU7eDuemYJfoUo3qOEhClgRvgcT7nSuQV7e1vyiGYbiBP1ZDVohOA64uUgYwiZf/exec'}   // URL /exec del Apps Script de altas (cuenta info@pbgroup.com.uy); vacío = sin bloque de alta
   };
   var CFG=VAR[window.VARIANTE||(/\/interior(\/|$)/.test(location.pathname)?'interior':'montevideo')];
   var MINIMO=CFG.minimo, OUTLET=-2, TONO={0:1,1:1,2:1,3:1,4:1}, TELS=[{nombre:'',tel:CFG.tel}], OUTLET_ON=true, OCULTOS={};
